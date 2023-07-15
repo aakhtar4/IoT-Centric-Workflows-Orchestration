@@ -1,0 +1,179 @@
+@CHARSET "ISO-8859-1";
+*, *:before, *:after {
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Nunito', sans-serif;
+  color: #0b0c0c;
+    width: 100%;
+    height: 100%;
+}
+.btn-default {
+    outline: none !important;
+}
+.icon {
+    font-size: 17px;
+    height: 40px;
+    padding-left: 10px;
+    width: 40px;
+    background-color: white;
+    z-index: 10000;
+    border: none;
+}
+.overlay {
+    position: absolute;
+    display: table-row;
+    height: auto;
+    /* max-height: 446px; */
+    background-color: white;
+    width: 40px;
+    margin-left: 20px;
+    margin-top: 20px;
+    box-shadow: 0 0 3px #000000;
+    overflow: hidden;
+    border-radius: 5px;
+}
+#ClearBtn {
+    background-image: url(images/clear.png);
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: pointer;
+    background-size: 100%;
+    background-size: 40px auto;
+    font-size: 40px;
+    background-color: #e6e6e6;
+    margin-bottom: 0px;
+    text-align: right;
+    border: none;
+    color: green;
+}
+#HelpButton {
+    background-image: url(images/info.png);
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: pointer;
+    background-size: 100%;
+    background-size: 30px 30px;
+    font-size: 15px;
+    background-color: #e6e6e6;
+    margin-bottom: 0px;
+    text-align: right;
+    border: none;
+}
+#uploadButton {
+    background-image: url(images/upload.png);
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: pointer;
+    background-size: 100%;
+    background-size: 30px 30px;
+    font-size: 15px;
+    background-color: #e6e6e6;
+    margin-bottom: 0px;
+    text-align: right;
+    border: none;
+}
+
+
+#addBlockLogo {
+    background-image: url(images/addBlock.png);
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: pointer;
+    background-size: 100%;
+    background-size: 30px 30px;
+    font-size: 15px;
+    background-color: #e6e6e6;
+    margin-bottom: 0px;
+    text-align: right;
+    border: none;
+}
+#CopyServiceLogo {
+    background-image: url(images/copyService.png);
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: pointer;
+    background-size: 100%;
+    background-size: 30px 30px;
+    font-size: 15px;
+    background-color: #e6e6e6;
+    margin-bottom: 0px;
+    text-align: right;
+    border: none;
+}
+.popout {
+    animation: popout 1s ease;
+    -webkit-animation: popout 1s ease;
+}
+#EditorLogosChild {
+    left: 50%;
+    margin-bottom: -45px;
+    -webkit-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    border-bottom: 55px solid #dee1e5;
+    border-left: 37px solid transparent;
+    border-right: 37px solid transparent;
+    height: 0px;
+    width: 380px;
+    position: absolute;
+    text-align: center;
+    bottom: 0;
+    padding-bottom: 30px;
+}
+
+#SetInstructionsLogo {
+    background-image: url(images/SetInstructions.png);
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: pointer;
+    background-size: 100%;
+    background-size: 45px auto;
+    width: 60px;
+    height: 60px;
+    margin-left: 10px;
+    border: 0px;
+    border-radius: 15px;
+    background-color: white;
+    box-shadow: 0 0 3px #000000;
+}
+#createWorkFlowLogo {
+    background-image: url(images/createBlock.png);
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: pointer;
+    background-size: 100%;
+    background-size: 45px auto;
+    width: 60px;
+    height: 60px;
+    margin-left: 10px;
+    border: 0px;
+    border-radius: 15px;
+    background-color: white;
+    box-shadow: 0 0 3px #000000;
+}
+#graphPaper{
+	cursor: default;
+    height: 100%;
+    width: 100%;
+    padding: 0px;
+    background-color: black;
+	overflow: auto !important;
+
+}
+
+
+#paper1{
+    position: relative;
+    overflow-x: scroll;
+    /*overflow-y: scroll;*/
+	   width: 92%;
+    height: 76%;
+    margin-bottom: 300px;
+    margin-left: 90px;
+}
+
+ 

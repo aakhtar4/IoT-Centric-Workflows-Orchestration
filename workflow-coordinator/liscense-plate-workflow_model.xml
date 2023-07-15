@@ -1,0 +1,396 @@
+<?xml version="1.0"?>
+<Workflow>
+<Task id="1">
+<Gamma id="1">
+<Service_Name>video_chunk_buffer_service</Service_Name>
+<Service_Category>Fog Service</Service_Category>
+<Service_Type>sensor</Service_Type>
+<Deployable>non_deployable</Deployable>
+<URI>home/video_chunk_buffer_service</URI>
+<Service_Input>(measurement unit, duration)</Service_Input>
+<Service_Output>Video Feed</Service_Output>
+<Location>
+<Latitude>30.456048</Latitude>
+<Longitude>-91.205240</Longitude>
+<Radius>
+<Value>200</Value>
+<Unit>meters</Unit>
+</Radius>
+</Location>
+<Availability>
+<Value>5</Value>
+<Unit>mintus</Unit>
+</Availability>
+<Hardware_Requirements>
+<external_storage>
+<Value>8</Value>
+<Unit>GB</Unit>
+</external_storage>
+<RAM>
+<Value>4</Value>
+<Unit>GB</Unit>
+</RAM>
+<CPU>1.2 GHZ quad-core ARM Cortex A53 (ARMv8 Instruction Set)</CPU>
+<Network>10/100 MBPS Ethernet, 802.11n Wireless LAN, Bluetooth 4.0</Network>
+</Hardware_Requirements>
+<Software_Requirements>
+<OS>raspbian</OS>
+<Packages_List>
+<Package>Java</Package>
+<Package>.Net</Package>
+<Package>Ruby</Package>
+<Package>MySQL</Package>
+</Packages_List>
+</Software_Requirements>
+</Gamma>
+<Gamma id="2">
+<Service_Name>video_decoding_service</Service_Name>
+<Service_Category>Fog Service</Service_Category>
+<Service_Type>Fog Service</Service_Type>
+<Deployable>deployable</Deployable>
+<URI>home/video_decoding_service</URI>
+<Service_Input>video_file.mp4</Service_Input>
+<Service_Output>frames.png</Service_Output>
+<Location>
+<Latitude>30.456048</Latitude>
+<Longitude>-91.205240</Longitude>
+<Radius>
+<Value>200</Value>
+<Unit>meters</Unit>
+</Radius>
+</Location>
+<Availability>
+<Value>10</Value>
+<Unit>mintus</Unit>
+</Availability>
+<Hardware_Requirements>
+<external_storage>
+<Value>8</Value>
+<Unit>GB</Unit>
+</external_storage>
+<RAM>
+<Value>4</Value>
+<Unit>GB</Unit>
+</RAM>
+<CPU>1.2 GHZ quad-core ARM Cortex A53 (ARMv8 Instruction Set)</CPU>
+<Network>10/100 MBPS Ethernet, 802.11n Wireless LAN, Bluetooth 4.0</Network>
+</Hardware_Requirements>
+<Software_Requirements>
+<OS>raspbian</OS>
+<Packages_List>
+<Package>Java</Package>
+<Package>.Net</Package>
+<Package>Ruby</Package>
+<Package>MySQL</Package>
+</Packages_List>
+</Software_Requirements>
+</Gamma>
+</Task>
+<Task id="2">
+<Gamma id="1">
+<Service_Name>video_chunk_buffer_service</Service_Name>
+<Service_Category>Fog Service</Service_Category>
+<Service_Type>sensor</Service_Type>
+<Deployable>non_deployable</Deployable>
+<URI>home/video_chunk_buffer_service</URI>
+<Service_Input>(measurement unit, duration)</Service_Input>
+<Service_Output>Video Feed</Service_Output>
+<Location>
+<Latitude>30.456048</Latitude>
+<Longitude>-91.205240</Longitude>
+<Radius>
+<Value>200</Value>
+<Unit>meters</Unit>
+</Radius>
+</Location>
+<Availability>
+<Value>5</Value>
+<Unit>mintus</Unit>
+</Availability>
+<Hardware_Requirements>
+<external_storage>
+<Value>4</Value>
+<Unit>GB</Unit>
+</external_storage>
+<RAM>
+<Value>4</Value>
+<Unit>GB</Unit>
+</RAM>
+<CPU>1.2ghz</CPU>
+<Network>10/100 MBPS Ethernet, 802.11n Wireless LAN, Bluetooth 4.0</Network>
+</Hardware_Requirements>
+<Software_Requirements>
+<OS>raspbian</OS>
+<Packages_List>
+<Package>java</Package>
+<Package>rubby</Package>
+<Package>.NET</Package>
+<Package>MySQL</Package>
+</Packages_List>
+</Software_Requirements>
+</Gamma>
+<Gamma id="2">
+<Service_Name>object_detection_service</Service_Name>
+<Service_Category>Fog Service</Service_Category>
+<Service_Type>Fog Service</Service_Type>
+<Deployable>deployable</Deployable>
+<URI>home/object_detection_service</URI>
+<Service_Input>(video_chunk.mp4)</Service_Input>
+<Service_Output>(vehicle_image.mp4)</Service_Output>
+<Location>
+<Latitude>30.456048</Latitude>
+<Longitude>-91.205240</Longitude>
+<Radius>
+<Value>200</Value>
+<Unit>meters</Unit>
+</Radius>
+</Location>
+<Availability>
+<Value>10</Value>
+<Unit>mintus</Unit>
+</Availability>
+<Hardware_Requirements>
+<external_storage>
+<Value>4</Value>
+<Unit>GB</Unit>
+</external_storage>
+<RAM>
+<Value>4</Value>
+<Unit>GB</Unit>
+</RAM>
+<CPU>1.2ghz</CPU>
+<Network>10/100 MBPS Ethernet, 802.11n Wireless LAN, Bluetooth 4.0</Network>
+</Hardware_Requirements>
+<Software_Requirements>
+<OS>raspbian</OS>
+<Packages_List>
+<Package>java</Package>
+<Package>rubby</Package>
+<Package>.NET</Package>
+<Package>MySQL</Package>
+</Packages_List>
+</Software_Requirements>
+</Gamma>
+</Task>
+<Task id="3">
+<Gamma id="1">
+<Service_Name>image_list_buffer_service</Service_Name>
+<Service_Category>Fog Service</Service_Category>
+<Service_Type>sensor</Service_Type>
+<Deployable>non_deployable</Deployable>
+<URI>home</URI>
+<Service_Input>(file format, image size)</Service_Input>
+<Service_Output>Image List</Service_Output>
+<Location>
+<Latitude>30.456048</Latitude>
+<Longitude>-91.205240</Longitude>
+<Radius>
+<Value>200</Value>
+<Unit>meters</Unit>
+</Radius>
+</Location>
+<Availability>
+<Value>5</Value>
+<Unit>mintus</Unit>
+</Availability>
+<Hardware_Requirements>
+<external_storage>
+<Value>4</Value>
+<Unit>GB</Unit>
+</external_storage>
+<RAM>
+<Value>4</Value>
+<Unit>GB</Unit>
+</RAM>
+<CPU>1.2ghz</CPU>
+<Network>10/100 MBPS Ethernet, 802.11n Wireless LAN, Bluetooth 4.0</Network>
+</Hardware_Requirements>
+<Software_Requirements>
+<OS>raspbian</OS>
+<Packages_List>
+<Package>java</Package>
+<Package>rubby</Package>
+<Package>.NET</Package>
+<Package>MySQL</Package>
+</Packages_List>
+</Software_Requirements>
+</Gamma>
+<Gamma id="2">
+<Service_Name>license_plate_recognition_service</Service_Name>
+<Service_Category>Fog Service</Service_Category>
+<Service_Type>Fog Service</Service_Type>
+<Deployable>deployable</Deployable>
+<URI>home/license_plate_recognition_service</URI>
+<Service_Input>image_list</Service_Input>
+<Service_Output>license_plate_no</Service_Output>
+<Location>
+<Latitude>30.456048</Latitude>
+<Longitude>-91.205240</Longitude>
+<Radius>
+<Value>200</Value>
+<Unit>meters</Unit>
+</Radius>
+</Location>
+<Availability>
+<Value>10</Value>
+<Unit>mintus</Unit>
+</Availability>
+<Hardware_Requirements>
+<external_storage>
+<Value>4</Value>
+<Unit>GB</Unit>
+</external_storage>
+<RAM>
+<Value>4</Value>
+<Unit>GB</Unit>
+</RAM>
+<CPU>1.2ghz</CPU>
+<Network>10/100 MBPS Ethernet, 802.11n Wireless LAN, Bluetooth 4.0</Network>
+</Hardware_Requirements>
+<Software_Requirements>
+<OS>raspbian</OS>
+<Packages_List>
+<Package>java</Package>
+<Package>rubby</Package>
+<Package>.NET</Package>
+<Package>MySQL</Package>
+</Packages_List>
+</Software_Requirements>
+</Gamma>
+</Task>
+<interaction id="1">
+<Gamma_1>1</Gamma_1>
+<Gamma_2>2</Gamma_2>
+<QOS>
+<Latency>
+<Value>50</Value>
+<Unit>ms</Unit>
+</Latency>
+<Bandwidth>
+<Value>5</Value>
+<Unit>Mbps</Unit>
+</Bandwidth>
+<Sampling_Rate>
+<Value>10</Value>
+<Unit>sps</Unit>
+</Sampling_Rate>
+</QOS>
+<Inter_Interval_Time>
+<Value>50</Value>
+<Unit>msec</Unit>
+</Inter_Interval_Time>
+<Message>
+<Sent>http</Sent>
+<Received>http</Received>
+</Message>
+<Gamma_1_Address>home</Gamma_1_Address>
+<Gamma_2_Address>home</Gamma_2_Address>
+</interaction><interaction id="2">
+<Gamma_1>2</Gamma_1>
+<Gamma_2>3</Gamma_2>
+<QOS>
+<Latency>
+<Value>50</Value>
+<Unit>ms</Unit>
+</Latency>
+<Bandwidth>
+<Value>5</Value>
+<Unit>Mbps</Unit>
+</Bandwidth>
+<Sampling_Rate>
+<Value>10</Value>
+<Unit>sps</Unit>
+</Sampling_Rate>
+</QOS>
+<Inter_Interval_Time>
+<Value>50</Value>
+<Unit>msec</Unit>
+</Inter_Interval_Time>
+<Message>
+<Sent>http</Sent>
+<Received>http</Received>
+</Message>
+<Gamma_1_Address>home</Gamma_1_Address>
+<Gamma_2_Address>home</Gamma_2_Address>
+</interaction><interaction id="3">
+<Gamma_1>3</Gamma_1>
+<Gamma_2>4</Gamma_2>
+<QOS>
+<Latency>
+<Value>50</Value>
+<Unit>ms</Unit>
+</Latency>
+<Bandwidth>
+<Value>5</Value>
+<Unit>Mbps</Unit>
+</Bandwidth>
+<Sampling_Rate>
+<Value>10</Value>
+<Unit>sps</Unit>
+</Sampling_Rate>
+</QOS>
+<Inter_Interval_Time>
+<Value>50</Value>
+<Unit>msec</Unit>
+</Inter_Interval_Time>
+<Message>
+<Sent>http</Sent>
+<Received>http</Received>
+</Message>
+<Gamma_1_Address>home</Gamma_1_Address>
+<Gamma_2_Address>home</Gamma_2_Address>
+</interaction><interaction id="4">
+<Gamma_1>4</Gamma_1>
+<Gamma_2>5</Gamma_2>
+<QOS>
+<Latency>
+<Value>50</Value>
+<Unit>ms</Unit>
+</Latency>
+<Bandwidth>
+<Value>5</Value>
+<Unit>Mbps</Unit>
+</Bandwidth>
+<Sampling_Rate>
+<Value>10</Value>
+<Unit>sps</Unit>
+</Sampling_Rate>
+</QOS>
+<Inter_Interval_Time>
+<Value>50</Value>
+<Unit>msec</Unit>
+</Inter_Interval_Time>
+<Message>
+<Sent>http</Sent>
+<Received>http</Received>
+</Message>
+<Gamma_1_Address>home</Gamma_1_Address>
+<Gamma_2_Address>home</Gamma_2_Address>
+</interaction><interaction id="5">
+<Gamma_1>5</Gamma_1>
+<Gamma_2>6</Gamma_2>
+<QOS>
+<Latency>
+<Value>50</Value>
+<Unit>ms</Unit>
+</Latency>
+<Bandwidth>
+<Value>5</Value>
+<Unit>Mbps</Unit>
+</Bandwidth>
+<Sampling_Rate>
+<Value>10</Value>
+<Unit>sps</Unit>
+</Sampling_Rate>
+</QOS>
+<Inter_Interval_Time>
+<Value>50</Value>
+<Unit>msec</Unit>
+</Inter_Interval_Time>
+<Message>
+<Sent>http</Sent>
+<Received>http</Received>
+</Message>
+<Gamma_1_Address>home</Gamma_1_Address>
+<Gamma_2_Address>home</Gamma_2_Address>
+</interaction></Workflow>

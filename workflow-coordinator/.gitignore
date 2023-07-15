@@ -1,0 +1,11 @@
+/target/*
+!/target/classes
+/target/classes/*
+!/target/classes/config
+/moquette_store.mapdb
+/moquette_store.mapdb.p
+/moquette_store.mapdb.t
+*.kml
+pos*.xml
+/map_display.html
+/plume_display.html
