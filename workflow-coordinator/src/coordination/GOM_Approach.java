@@ -198,7 +198,6 @@ public class GOM_Approach
 						Fog_Service_IP_Address[Fog_Service_Count] = IP_Address;
 
 						Fog_Service_Count = Fog_Service_Count + 1;
-
 					}
 					else
 					{

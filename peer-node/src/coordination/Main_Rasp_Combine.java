@@ -33,6 +33,11 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.Session;
+
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 
@@ -54,6 +59,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import java.io.Writer;
 import java.io.Reader;
 
@@ -96,7 +102,10 @@ public class Main_Rasp_Combine
 	public static int Assignment_deployment_task_id = 0;
 	public static int deployment_service_count = 0;
 	public static int deployment_client_count = 0;
-	public static Mobility m1;
+	public static Mobility_GOM m1_gom;
+	public static Mobility_LOM m1_lom;
+	public static String approach = "";
+	public static xml_task_parser xtp;
 	
 	public static final Pattern TAG_REGEX_LEFT = Pattern.compile("<LHS>(.+?)</LHS>");	
 	public static final Pattern TAG_REGEX_RIGHT = Pattern.compile("<RHS>(.+?)</RHS>");	
@@ -167,12 +176,23 @@ public class Main_Rasp_Combine
 					System.out.println("-------------------------------------");
 					for(int op=0; op<20; op++)
 					{
-						if(text_message.contains(Mobility.device_IP_Address[op]))
+						if (approach.contains("GOM")) {
+						if(text_message.contains(Mobility_GOM.device_IP_Address[op]))
 						{
-							System.out.println("Residence Time ="+Mobility.residence_time_minutes[op]);
-							Mobility.residence_time_minutes[op] = Mobility.residence_time_assigned[op];
-							Mobility.startTime[op] = System.currentTimeMillis();
+							System.out.println("Residence Time ="+Mobility_GOM.residence_time_minutes[op]);
+							Mobility_GOM.residence_time_minutes[op] = Mobility_GOM.residence_time_assigned[op];
+							Mobility_GOM.startTime[op] = System.currentTimeMillis();
 						}
+						}
+						else {
+							if(text_message.contains(Mobility_LOM.device_IP_Address[op]))
+							{
+								System.out.println("Residence Time ="+Mobility_LOM.residence_time_minutes[op]);
+								Mobility_LOM.residence_time_minutes[op] = Mobility_LOM.residence_time_assigned[op];
+								Mobility_LOM.startTime[op] = System.currentTimeMillis();
+							}
+							}
+						
 					}
 				}
 			}
@@ -370,12 +390,26 @@ public class Main_Rasp_Combine
 				
 				for(int cd = 0; cd<20; cd++)
 				{
-					System.out.println("m1.device_IP_Address[cd] ="+Mobility.device_IP_Address[cd]);
-				
-					if(status_message.contains(Mobility.device_IP_Address[cd]))
+					if (approach.contains("GOM")) {
+					System.out.println("m1_gom.device_IP_Address[cd] ="+Mobility_GOM.device_IP_Address[cd]);
+					
+					if(status_message.contains(Mobility_GOM.device_IP_Address[cd]))
 					{
-						System.out.println("Status Updation =" + Mobility.device_IP_Address[cd]);
-						m1.device_last_update_time[cd] = System.currentTimeMillis();
+						System.out.println("Status Updation =" + Mobility_GOM.device_IP_Address[cd]);
+						m1_gom.device_last_update_time[cd] = System.currentTimeMillis();
+					}
+					}
+					else
+					{
+
+						System.out.println("m1_lom.device_IP_Address[cd] ="+Mobility_LOM.device_IP_Address[cd]);
+						
+						if(status_message.contains(Mobility_LOM.device_IP_Address[cd]))
+						{
+							System.out.println("Status Updation =" + Mobility_LOM.device_IP_Address[cd]);
+							m1_lom.device_last_update_time[cd] = System.currentTimeMillis();
+						}
+						
 					}
 				}
 			}
@@ -422,74 +456,86 @@ public class Main_Rasp_Combine
 				  Document doc = convertStringToDocument(xmlStr); 
 				  parseXML(doc);
 				  
+				  if (approach.contains("GOM")) {
+				  //left_informed_flag = device has left
 				  if(left_informed_flag == 1)
 				  {
 					  left_informed_flag = 0;
 					  
 					  if(sampleClient_RP.isConnected())
-					  {
-				        	try
-				        	{
+				        {
+				        	try{
 				        		//for result evaluation
 				        		if(mesg.contains("<Task>[1]</Task>"))
 				        		{
-					        		String one = "<hint>[1]</hint> End";
-					        		MqttMessage deployment_msg = new MqttMessage(one.getBytes());
-					        		deployment_msg.setQos(qos);
-					        		
-					        		sampleClient_RP.publish("iot_data", deployment_msg);
-				        		}
+				        		String one = "<hint>[1]</hint> End";
+				        		MqttMessage deployment_msg = new MqttMessage(one.getBytes());
+				        		deployment_msg.setQos(qos);
 				        		
+				        		sampleClient_RP.publish("iot_data", deployment_msg);
+				        		//Main_Rasp.sampleClient_RP.publish("iot_data", execution_message);
+				        		
+				        		}
 				        		if(mesg.contains("<Task>[4]</Task>"))
 				        		{
-					        		String four = "<hint>[4]</hint> End";
-					        		MqttMessage deployment_msg = new MqttMessage(four.getBytes());
-					        		deployment_msg.setQos(qos);
-					        		
-					        		sampleClient_RP.publish("iot_data", deployment_msg);
+				        		String four = "<hint>[4]</hint> End";
+				        		MqttMessage deployment_msg = new MqttMessage(four.getBytes());
+				        		deployment_msg.setQos(qos);
+				        		
+				        		sampleClient_RP.publish("iot_data", deployment_msg);
+				        		//Main_Rasp_Local.sampleClient_RP.publish("iot_data", execution_message);
+				        		
 				        		}
-				        	}
-				        	catch (MqttException me)
-				        	{
+				        		
+				        		
+				        	}catch (MqttException me) {
 								me.printStackTrace();
 							}
-			        }
-			        else
-			        {
-			        	left_informed_flag = 0;
-			        	
-			        	try
-						{
-			        		if(mesg.contains("<Task>[1]</Task>"))
-			        		{
+				        }
+				        else
+				        {
+				        	left_informed_flag = 0;
+				        	try
+							{
+				        		//for result evaluation
+				        		if(mesg.contains("<Task>[1]</Task>"))
+				        		{
 				        		String one = "<hint>[1]</hint> End";
 				        		MqttMessage deployment_msg = new MqttMessage(one.getBytes());
 				        		deployment_msg.setQos(qos);
 				        		
 				        		sampleClient_RP.connect(connOpts);
 				        		sampleClient_RP.publish("iot_data", deployment_msg);
-			        		}
-			        		
-			        		if(mesg.contains("<Task>[4]</Task>"))
-			        		{
+				        		
+				        		
+				        		}
+				        		
+				        		if(mesg.contains("<Task>[4]</Task>"))
+				        		{
 				        		String four = "<hint>[4]</hint> End";
 				        		MqttMessage deployment_msg = new MqttMessage(four.getBytes());
 				        		deployment_msg.setQos(qos);
 				        		
 				        		sampleClient_RP.connect(connOpts);
 				        		sampleClient_RP.publish("iot_data", deployment_msg);
-			        		}
-						}
-			        	catch (MqttException me)
-			        	{
-							me.printStackTrace();
-						}
-			        }
+				        		
+				        		
+				        		}
+				        		
+				        		
+							}catch (MqttException me) {
+								me.printStackTrace();
+							}
+				        }
+					  
+					  
 				  }
+				  }
+				   
 			  }
 			
 			//received streaming message from workflow coordinator
-			if(new String(message.getPayload().array()).contains("Streaming"))
+			if(new String(message.getPayload().array()).contains("Streaming") && approach.contains("GOM"))
 			{
 				String content = "Streaming";
 				MqttMessage streaming_message = new MqttMessage(content.getBytes());
@@ -528,7 +574,10 @@ public class Main_Rasp_Combine
 			
 			if(new String(message.getPayload().array()).contains("<?xml version=\"1.0\"?><Deployment>"))
 			{
+				System.out.println("Deployment Message");
 				Deployment_Message = new String(message.getPayload().array());
+				
+				if (approach.contains("GOM")) {
 				Deployment_Message_List[deployment_service_count] = new String(message.getPayload().array());
 				deployment_service_count = deployment_service_count + 1;
 				
@@ -539,23 +588,217 @@ public class Main_Rasp_Combine
 				
 				if(deployment_service_count == 0 && Deployment_Task_Count > 0)
 				{
+				Deployment_Task_Count = 0;
+				}
+				}
+				
+				if (approach.contains("LOM")) {
 					Deployment_Task_Count = 0;
 				}
 				
 				Deployment_Task_Details[Deployment_Task_Count] = Deployment_Message;
 				Deployment_Task_Count = Deployment_Task_Count + 1;
-
+				//Deployment_Task_Count = 1;
 				for(int cd = 0; cd<20; cd++)
 				{
-					if(Deployment_Message.contains(Mobility.device_IP_Address[cd]))
+					//System.out.println("m1.device_IP_Address[cd] ="+m1.device_IP_Address[cd]);
+					if (approach.contains("GOM")) {
+					if(Deployment_Message.contains(m1_gom.device_IP_Address[cd]))
 					{
-						System.out.println("Status Updation in deployment =" + Mobility.device_IP_Address[cd]);
-						m1.device_last_update_time[cd] = System.currentTimeMillis();
+						System.out.println("Status Updation in deployment ="+m1_gom.device_IP_Address[cd]);
+						m1_gom.device_last_update_time[cd] = System.currentTimeMillis();
 					
+					}
+					}else
+					{
+
+						if(Deployment_Message.contains(m1_lom.device_IP_Address[cd]))
+						{
+							System.out.println("Status Updation in deployment ="+m1_lom.device_IP_Address[cd]);
+							m1_lom.device_last_update_time[cd] = System.currentTimeMillis();
+						
+						}
+							
 					}
 				}
 				
 			}
+			
+			if(new String(message.getPayload().array()).contains("<?xml version=\"1.0\"?><Workflow>"))
+			{
+				if (approach.contains("LOM")) {
+				System.out.println("Orchestration Request");
+				String xmlStr= new String(message.getPayload().array());
+				Document doc = convertStringToDocument(xmlStr); 
+			    xtp = new xml_task_parser();
+			    xtp.xml_parser(doc);
+				int kk = 0;
+				int lmn = 0;
+				
+				System.out.println("xtp.Task_Id_Track[lmn] == "+xtp.Task_Id_Track[lmn]);
+				System.out.println("IoT_Device_1 == "+IoT_Device_1);
+				System.out.println("xtp.Communcation_Message[xtp.Task_Id_Track[lmn]] ="+xtp.Communcation_Message[xtp.Task_Id_Track[lmn]]);
+				System.out.println("xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]] ="+xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]]);
+				
+				if(xtp.Communcation_Message[xtp.Task_Id_Track[lmn]] != null && (xtp.Task_Id_Track[lmn] == 1 || xtp.Task_Id_Track[lmn] == 4))
+				{
+					String DEVICE_URI = IoT_Device_1.replace("tcp://","");
+					if(!(DEVICE_URI.contains(xtp.IP_Address)))
+					xtp.Communcation_Message[xtp.Task_Id_Track[lmn]] = xtp.Communcation_Message[xtp.Task_Id_Track[lmn]].replace(xtp.IP_Address, DEVICE_URI);
+					if(!(DEVICE_URI.contains("10.103.72.38")))
+					xtp.Communcation_Message[xtp.Task_Id_Track[lmn]] = xtp.Communcation_Message[xtp.Task_Id_Track[lmn]].replace("10.103.72.38", DEVICE_URI);
+					if(!(DEVICE_URI.contains("10.103.72.39")))
+					xtp.Communcation_Message[xtp.Task_Id_Track[lmn]] = xtp.Communcation_Message[xtp.Task_Id_Track[lmn]].replace("10.103.72.39", DEVICE_URI);
+					if(!(DEVICE_URI.contains("10.103.72.40")))
+					xtp.Communcation_Message[xtp.Task_Id_Track[lmn]] = xtp.Communcation_Message[xtp.Task_Id_Track[lmn]].replace("10.103.72.40", DEVICE_URI);
+					if(!(DEVICE_URI.contains("10.103.72.41")))
+					xtp.Communcation_Message[xtp.Task_Id_Track[lmn]] = xtp.Communcation_Message[xtp.Task_Id_Track[lmn]].replace("10.103.72.41", DEVICE_URI);
+					if(!(DEVICE_URI.contains("10.103.72.42")))
+					xtp.Communcation_Message[xtp.Task_Id_Track[lmn]] = xtp.Communcation_Message[xtp.Task_Id_Track[lmn]].replace("10.103.72.42", DEVICE_URI);
+					if(!(DEVICE_URI.contains("10.103.72.43")))
+					xtp.Communcation_Message[xtp.Task_Id_Track[lmn]] = xtp.Communcation_Message[xtp.Task_Id_Track[lmn]].replace("10.103.72.43", DEVICE_URI);
+					if(!(DEVICE_URI.contains("10.103.72.44")))
+					xtp.Communcation_Message[xtp.Task_Id_Track[lmn]] = xtp.Communcation_Message[xtp.Task_Id_Track[lmn]].replace("10.103.72.44", DEVICE_URI);
+					if(!(DEVICE_URI.contains("10.103.72.45")))
+					xtp.Communcation_Message[xtp.Task_Id_Track[lmn]] = xtp.Communcation_Message[xtp.Task_Id_Track[lmn]].replace("10.103.72.45", DEVICE_URI);
+					if(!(DEVICE_URI.contains("10.103.72.46")))
+					xtp.Communcation_Message[xtp.Task_Id_Track[lmn]] = xtp.Communcation_Message[xtp.Task_Id_Track[lmn]].replace("10.103.72.46", DEVICE_URI);
+					if(!(DEVICE_URI.contains("10.103.72.47")))
+					xtp.Communcation_Message[xtp.Task_Id_Track[lmn]] = xtp.Communcation_Message[xtp.Task_Id_Track[lmn]].replace("10.103.72.47", DEVICE_URI);
+					if(!(DEVICE_URI.contains("10.103.72.48")))
+					xtp.Communcation_Message[xtp.Task_Id_Track[lmn]] = xtp.Communcation_Message[xtp.Task_Id_Track[lmn]].replace("10.103.72.48", DEVICE_URI);
+					if(!(DEVICE_URI.contains("10.103.72.49")))
+					xtp.Communcation_Message[xtp.Task_Id_Track[lmn]] = xtp.Communcation_Message[xtp.Task_Id_Track[lmn]].replace("10.103.72.49", DEVICE_URI);
+					if(!(DEVICE_URI.contains("10.103.72.50")))
+					xtp.Communcation_Message[xtp.Task_Id_Track[lmn]] = xtp.Communcation_Message[xtp.Task_Id_Track[lmn]].replace("10.103.72.50", DEVICE_URI);
+					if(!(DEVICE_URI.contains("10.103.72.51")))
+					xtp.Communcation_Message[xtp.Task_Id_Track[lmn]] = xtp.Communcation_Message[xtp.Task_Id_Track[lmn]].replace("10.103.72.51", DEVICE_URI);
+					if(!(DEVICE_URI.contains("10.103.72.52")))
+					xtp.Communcation_Message[xtp.Task_Id_Track[lmn]] = xtp.Communcation_Message[xtp.Task_Id_Track[lmn]].replace("10.103.72.52", DEVICE_URI);
+					if(!(DEVICE_URI.contains("10.103.72.53")))
+					xtp.Communcation_Message[xtp.Task_Id_Track[lmn]] = xtp.Communcation_Message[xtp.Task_Id_Track[lmn]].replace("10.103.72.53", DEVICE_URI);
+					if(!(DEVICE_URI.contains("10.103.72.54")))
+					xtp.Communcation_Message[xtp.Task_Id_Track[lmn]] = xtp.Communcation_Message[xtp.Task_Id_Track[lmn]].replace("10.103.72.54", DEVICE_URI);
+					if(!(DEVICE_URI.contains("10.103.72.55")))
+					xtp.Communcation_Message[xtp.Task_Id_Track[lmn]] = xtp.Communcation_Message[xtp.Task_Id_Track[lmn]].replace("10.103.72.55", DEVICE_URI);
+					if(!(DEVICE_URI.contains("10.103.72.56")))
+					xtp.Communcation_Message[xtp.Task_Id_Track[lmn]] = xtp.Communcation_Message[xtp.Task_Id_Track[lmn]].replace("10.103.72.56", DEVICE_URI);
+					if(!(DEVICE_URI.contains("10.103.72.57")))
+					xtp.Communcation_Message[xtp.Task_Id_Track[lmn]] = xtp.Communcation_Message[xtp.Task_Id_Track[lmn]].replace("10.103.72.57", DEVICE_URI);
+					
+				}
+				
+				if(xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]] != null && (xtp.Task_Id_Track[lmn] == 1 || xtp.Task_Id_Track[lmn] == 4))
+				 {
+					String DEVICE_URI = IoT_Device_1.replace("tcp://","");
+				    System.out.println("Deployment IP Address: ");
+				    if(!(DEVICE_URI.contains(xtp.IP_Address)))
+					xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]] = xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]].replace(xtp.IP_Address, DEVICE_URI);
+				    if(!(DEVICE_URI.contains("10.103.72.38")))
+					xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]] = xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]].replace("10.103.72.38", DEVICE_URI);
+				    if(!(DEVICE_URI.contains("10.103.72.39")))
+					xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]] = xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]].replace("10.103.72.39", DEVICE_URI);
+				    if(!(DEVICE_URI.contains("10.103.72.40")))
+					xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]] = xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]].replace("10.103.72.40", DEVICE_URI);
+				    if(!(DEVICE_URI.contains("10.103.72.41")))
+					xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]] = xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]].replace("10.103.72.41", DEVICE_URI);
+				    if(!(DEVICE_URI.contains("10.103.72.42")))
+					xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]] = xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]].replace("10.103.72.42", DEVICE_URI);
+				    if(!(DEVICE_URI.contains("10.103.72.43")))
+					xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]] = xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]].replace("10.103.72.43", DEVICE_URI);
+				    if(!(DEVICE_URI.contains("10.103.72.44")))
+					xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]] = xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]].replace("10.103.72.44", DEVICE_URI);
+				    if(!(DEVICE_URI.contains("10.103.72.45")))
+					xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]] = xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]].replace("10.103.72.45", DEVICE_URI);
+				    if(!(DEVICE_URI.contains("10.103.72.46")))
+					xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]] = xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]].replace("10.103.72.46", DEVICE_URI);
+				    if(!(DEVICE_URI.contains("10.103.72.47")))
+					xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]] = xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]].replace("10.103.72.47", DEVICE_URI);
+				    if(!(DEVICE_URI.contains("10.103.72.48")))
+					xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]] = xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]].replace("10.103.72.48", DEVICE_URI);
+				    if(!(DEVICE_URI.contains("10.103.72.49")))
+					xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]] = xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]].replace("10.103.72.49", DEVICE_URI);
+				    if(!(DEVICE_URI.contains("10.103.72.50")))
+					xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]] = xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]].replace("10.103.72.50", DEVICE_URI);
+				    if(!(DEVICE_URI.contains("10.103.72.51")))
+					xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]] = xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]].replace("10.103.72.51", DEVICE_URI);
+				    if(!(DEVICE_URI.contains("10.103.72.52")))
+					xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]] = xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]].replace("10.103.72.52", DEVICE_URI);
+				    if(!(DEVICE_URI.contains("10.103.72.53")))
+					xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]] = xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]].replace("10.103.72.53", DEVICE_URI);
+				    if(!(DEVICE_URI.contains("10.103.72.54")))
+					xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]] = xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]].replace("10.103.72.54", DEVICE_URI);
+				    if(!(DEVICE_URI.contains("10.103.72.55")))
+					xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]] = xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]].replace("10.103.72.55", DEVICE_URI);
+				    if(!(DEVICE_URI.contains("10.103.72.56")))
+					xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]] = xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]].replace("10.103.72.56", DEVICE_URI);
+				    if(!(DEVICE_URI.contains("10.103.72.57")))
+					xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]] = xtp.Deployment_IP_Address[xtp.Task_Id_Track[lmn]].replace("10.103.72.57", DEVICE_URI);
+				    
+				 //System.out.println("Deployment IP Address: "+read_xml_file.Deployment_IP_Address[read_xml_file.Task_Id_Track[lmn]]);
+				 }
+				
+				
+				System.out.println("xtp.Task_Gamma_Length[xtp.Task_Id] > 1 ="+xtp.Task_Gamma_Length[xtp.Task_Id]);
+				
+			    if(xtp.Task_Gamma_Length[xtp.Task_Id] > 1)
+				{
+			    	try
+				    {
+			    		//System.out.println("kk ="+kk);
+			    	kk = xtp.Task_Id - 1;	
+			    	System.out.println("kk= "+kk);
+					int no_of_uploads = xtp.SourceFilesData.get(kk).size();
+					System.out.println("no_of_uploads="+no_of_uploads);
+					for(int i=1; i<=no_of_uploads; i++)
+					{
+						String source_variable_name = "Source_File_Address_"+i;
+						String dest_variable_name = "Destination_File_Address_"+i;
+						if(xtp.SourceFilesData.get(kk).get(((source_variable_name+"_"+(kk+1)))) != null && xtp.DestinationFilesData.get(kk).get((dest_variable_name+"_"+(kk+1))) != null)
+						{
+						System.out.println(xtp.SourceFilesData.get(kk).get(((source_variable_name+"_"+(kk+1)))));
+						System.out.println(xtp.DestinationFilesData.get(kk).get((dest_variable_name+"_"+(kk+1))));
+						String Host_Address = xtp.Deployment_IP_Address[kk+1];
+						Host_Address = Host_Address.replace(":1883", "");
+						file_upload(xtp.SourceFilesData.get(kk).get(((source_variable_name+"_"+(kk+1)))),xtp.DestinationFilesData.get(kk).get((dest_variable_name+"_"+(kk+1))), Host_Address);
+					
+						}
+					}
+					
+					//now here
+					
+					//Here we are handling the deployment
+					System.out.println("Deployment Message");
+					Deployment_Message= xtp.Deployment_Message[kk+1];
+					System.out.println("Deployment_Message "+Deployment_Message);
+					//System.out.println("My Deployment_Message ="+Deployment_Message);
+					
+					Deployment_Task_Count = 0;
+					Deployment_Task_Details[Deployment_Task_Count] = Deployment_Message;
+					Deployment_Task_Count = Deployment_Task_Count + 1;
+					
+					//Now we are handling the task
+					
+					
+					
+					System.out.println("You should be here");
+					String xmlStr_task= xtp.Communcation_Message[kk+1];
+					System.out.println("xmlStr_task =\n"+xmlStr_task);
+					Document doc_task = convertStringToDocument(xmlStr_task); 
+					parseXML_LOM(doc_task);
+					
+				    }catch (Exception e) {
+						e.printStackTrace();
+				    }
+				}
+			    
+			    
+			
+			} //LOM Condition End
+			}
+			
+			
+			
 			
 			if(new String(message.getPayload().array()).contains("Deploy Vehicle Status Service"))
 			{
@@ -715,6 +958,34 @@ public class Main_Rasp_Combine
 	}
 	
 	
+	//only used in LOM
+		public static void file_upload(String src, String dest, String host_address)
+		  {
+			  try{
+			  String user="pi";
+			  //String host="10.103.72.64";
+			  String host=host_address;
+			  String password="abcd123";
+			  JSch jsch = new JSch();
+			  Session session = jsch.getSession(user, host);
+			  java.util.Properties config = new java.util.Properties(); 
+		      config.put("StrictHostKeyChecking", "no");
+		      session.setConfig(config);
+			  session.setPassword(password);
+			  session.connect();
+
+			  ChannelSftp sftpChannel = (ChannelSftp) session.openChannel("sftp");
+			  sftpChannel.connect();
+			  sftpChannel.put(src, dest);
+			  }
+			    catch(Exception e){
+			      System.out.println(e);
+			    }
+		  }
+
+
+	
+	
 	public static int generate_random_number()
 	{
 		int max = 4;
@@ -742,6 +1013,404 @@ public class Main_Rasp_Combine
         
         return null;
     }
+	
+	public static void parseXML_LOM(Document doc)
+	{
+
+    	doc.getDocumentElement().normalize();
+
+		System.out.println("Root element :" + doc.getDocumentElement().getNodeName());
+			
+		NodeList nServiceList = doc.getElementsByTagName("Services"); 
+		//System.out.println("nServiceList"+)
+		for(int temp = 0 ; temp <nServiceList.getLength(); temp++){ 
+		Node nNode = nServiceList.item(temp); 
+		Element eElement = (Element) nNode; 
+		NodeList childList = eElement.getChildNodes(); 
+		String [] sService_URI = new String[childList.getLength()] ; 
+		String [] sService_Source_IP_Add = new String[childList.getLength()] ; 
+		String [] sService_IP_Add = new String[childList.getLength()] ; 
+		String [] sService_Destination_IP_Add = new String[childList.getLength()] ; 
+		String [] sService_Type = new String[childList.getLength()] ; 
+		String [] sService_Name = new String[childList.getLength()] ; 
+		String [] sService_Deployment = new String[childList.getLength()] ; 
+		String content = "";
+		for(int i = 0; i < childList.getLength(); i++){ 
+		Node childNode = childList.item(i); 
+		
+		//System.out.println("Here I am getting exception");
+		String Service_Name = childNode.getAttributes().getNamedItem("name").getNodeValue();
+		
+		sService_Name[i] = Service_Name;
+		//System.out.println("Service Name is= "+childNode.getAttributes().getNamedItem("name").getNodeValue());
+		//sService[i] = childNode.getNodeName() + "\t" + childNode.getTextContent(); 
+		NodeList service_detail_nodeList = childNode.getChildNodes();
+		for(int kk=0;kk<service_detail_nodeList.getLength(); kk++)
+		{
+			Node service_detail_node = service_detail_nodeList.item(kk);
+			//System.out.println(service_detail_node.getNodeName() + "\t" + service_detail_node.getTextContent());
+			if(service_detail_node.getNodeName().contains("URI"))
+			sService_URI[i] = service_detail_node.getTextContent();
+			if(service_detail_node.getNodeName().contains("IP"))
+			{
+				NodeList IP_Address_nodeList = service_detail_node.getChildNodes();
+				//System.out.println("$$$$$$$$$$ Nodelist Lenght is"+IP_Address_nodeList.getLength());
+				if(IP_Address_nodeList.getLength() > 1)
+				{
+				for(int mm=0; mm<IP_Address_nodeList.getLength(); mm++)
+				{
+					Node IP_Address_node = IP_Address_nodeList.item(mm);
+					if(IP_Address_node.getNodeName().contains("Source"))
+					sService_Source_IP_Add[i] = IP_Address_node.getTextContent();
+					System.out.println("sService_Source_IP_Add[i] ="+sService_Source_IP_Add[i]);
+					if(IP_Address_node.getNodeName().contains("Destination"))
+					sService_Destination_IP_Add[i] = IP_Address_node.getTextContent();
+				}
+				}
+				else
+				{
+					sService_IP_Add[i] = service_detail_node.getTextContent();
+				}
+			}
+			//sService_IP_Add[i] = service_detail_node.getTextContent();
+			if(service_detail_node.getNodeName().contains("Type"))
+			sService_Type[i] = service_detail_node.getTextContent();
+			if(service_detail_node.getNodeName().contains("Deployment"))
+			sService_Deployment[i] = service_detail_node.getTextContent();
+			
+		}
+		if(sService_Type[i].contains("sensor") && sService_Deployment[i].contains("0"))
+		{
+			//IoT_Device_1 = "tcp://"+sService_Source_IP_Add[i]+":1883";
+			IoT_Device_1 = "tcp://"+sService_Source_IP_Add[i];
+			System.out.println("IoT_Device_1: "+IoT_Device_1);
+			System.out.println("\n**********\nSensor\n************\n");
+			try{
+			IoT_Device_1_Client = new MqttClient(IoT_Device_1, IoT_Device_1_ID , new MemoryPersistence());
+			connOpts_IoT_Device_1 = new MqttConnectOptions();
+			connOpts_IoT_Device_1.setCleanSession(true);
+			//connOpts_IoT_Device_1.setConnectionTimeout(1000);
+			connOpts_IoT_Device_1.setKeepAliveInterval(1000); 
+			//connOpts_IoT_Device_1.setAutomaticReconnect(true);
+			
+			System.out.println("Peer Node 1 connecting to IoT Device 1: " + IoT_Device_1);
+			IoT_Device_1_Client.setCallback( new SimpleMqttCallBack()  {
+				 public void connectionLost(Throwable throwable) {
+					    //System.out.println("Connection to MQTT broker lost!");
+					    System.out.println("Listening IoT_Device_1_Client......");
+					  }
+
+					  public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
+					    System.out.println("Message received here:\n\t"+ new String(mqttMessage.getPayload()) );
+					    //sampleClient_RP.publish("iot_data", mqttMessage);
+					  }
+
+					  public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
+					    // not used in this example
+					  }
+	        });
+			
+			IoT_Device_1_Client.connect(connOpts_IoT_Device_1);
+			System.out.println("Peer Node 1 Conencted to IoT Device 1");
+			String content_IoT_Device_1 = "Publish "+Service_Name+" Data to IP: ["+sService_Destination_IP_Add[i]+"]";
+			
+			System.out.println("Peer Node publishing message: " + content_IoT_Device_1);
+			MqttMessage message = new MqttMessage(content_IoT_Device_1.getBytes());
+			message.setQos(qos);
+			if(IoT_Device_1_Client.isConnected())
+			{
+				IoT_Device_1_Client.publish("Service_Execution_Peer_Node", message);
+			}else
+			{
+				try
+				{
+					/*Here commenting Connect is already in Progress*/
+					//IoT_Device_1_Client.connect(connOpts_IoT_Device_1);
+					IoT_Device_1_Client.publish("Service_Execution_Peer_Node", message);
+					/*Here commenting Connect is already in Progress*/
+					
+				}catch (MqttException me) {
+					me.printStackTrace();
+				}
+			}
+			Thread.sleep(200);
+			} catch (MqttException me) {
+				me.printStackTrace();
+			}catch (Throwable e) {
+				e.printStackTrace();
+			}
+				
+			
+		}
+		
+		if(sService_Type[i].contains("Fog Service") && sService_Deployment[i].contains("0"))
+		{
+			//IoT_Device_2 = "tcp://"+sService_IP_Add[i]+":1883";
+			IoT_Device_2 = "tcp://"+sService_IP_Add[i];
+			System.out.println("\n**********\nFog Service\n************\n"+IoT_Device_2);
+			if(IoT_Device_2_Client != null)
+			{
+				try{
+				String content_IoT_Device_2 = "Deploy "+Service_Name;
+				
+				System.out.println("Peer Node publishing message: " + content_IoT_Device_2);
+				MqttMessage message = new MqttMessage(content_IoT_Device_2.getBytes());
+				message.setQos(qos);
+				IoT_Device_2_Client.publish("Service_Execution_Peer_Node", message);
+				}catch (MqttException me) {
+					me.printStackTrace();
+				}
+			}
+			else
+			{
+				
+			try{
+			IoT_Device_2_Client = new MqttClient(IoT_Device_2, IoT_Device_2_ID , new MemoryPersistence());
+			connOpts_IoT_Device_2 = new MqttConnectOptions();
+			connOpts_IoT_Device_2.setCleanSession(true);
+			//connOpts_IoT_Device_2.setConnectionTimeout(1000);
+			connOpts_IoT_Device_2.setKeepAliveInterval(1000); 
+			//connOpts_IoT_Device_2.setAutomaticReconnect(true);
+			
+			System.out.println("Peer Node 1 connecting to IoT Device 2: " + IoT_Device_2);
+			IoT_Device_2_Client.setCallback( new SimpleMqttCallBack()  {
+				 public void connectionLost(Throwable throwable) {
+					    //System.out.println("Connection to MQTT broker lost!");
+					 System.out.println("Listening IoT_Device_2_Client......");
+					  }
+
+					  public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
+					    System.out.println("Message received here:\n\t"+ new String(mqttMessage.getPayload()) );
+					    //sampleClient_RP.publish("iot_data", mqttMessage);
+					  }
+
+					  public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
+					    // not used in this example
+					  }
+	        });
+			
+			IoT_Device_2_Client.connect(connOpts_IoT_Device_2);
+			System.out.println("PC-client connected to broker");
+			String content_IoT_Device_2 = "Deploy "+Service_Name;
+			
+			System.out.println("Peer Node publishing message: " + content_IoT_Device_2);
+			MqttMessage message = new MqttMessage(content_IoT_Device_2.getBytes());
+			message.setQos(qos);
+			if(IoT_Device_2_Client.isConnected())
+			{
+				IoT_Device_2_Client.publish("Service_Execution_Peer_Node", message);
+			}else
+			{
+				try
+				{
+					/*Here commenting Connect is already in Progress*/
+					//IoT_Device_2_Client.connect(connOpts_IoT_Device_1);
+					/*Here commenting Connect is already in Progress*/
+					IoT_Device_2_Client.publish("Service_Execution_Peer_Node", message);
+					
+				}catch (MqttException me) {
+					me.printStackTrace();
+				}
+			}
+			Thread.sleep(200);
+			} catch (MqttException me) {
+				me.printStackTrace();
+			}catch (Throwable e) {
+				e.printStackTrace();
+			}
+			}
+			
+		}
+		
+		
+		if(sService_Type[i].contains("Fog Service") && sService_Deployment[i].contains("1"))
+		{
+			int flag = 0;
+			Deployment_IP_Address_Count = 0;
+			if(IoT_Device_2.contains(sService_IP_Add[i])){flag = 1;}else{flag = 0;}
+			
+			Deployment_IP_Address[Deployment_IP_Address_Count] = sService_IP_Add[i];
+			//System.out.println("Deployment_Client_Name[Deployment_IP_Address_Count] ="+Deployment_Client_Name[Deployment_IP_Address_Count]+      "Deployment_IP_Address_Count ="+Deployment_IP_Address_Count);
+			
+			//System.out.println("Deployment_Client_Name[Deployment_IP_Address_Count] ="+Deployment_Client_Name[Deployment_IP_Address_Count]+      "Deployment_IP_Address_Count ="+Deployment_IP_Address_Count);
+			
+			
+			System.out.println("**************IoT_Device_2****************** ="+IoT_Device_2);
+			//IoT_Device_2 = "tcp://"+sService_IP_Add[i]+":1883";
+			IoT_Device_2 = "tcp://"+sService_IP_Add[i];
+			
+			
+			
+			System.out.println("IoT_Device_2 ="+IoT_Device_2);
+			System.out.println("I must be here");
+			//if(IoT_Device_2_Client.isConnected())
+			if(IoT_Device_2_Client != null && flag == 1)
+			{
+				System.out.println("***********************Connected*******************");
+				try{
+				String content_IoT_Device_2 = "Invoke "+Service_Name;
+				
+				System.out.println("Peer Node publishing message: " + content_IoT_Device_2);
+				MqttMessage message = new MqttMessage(content_IoT_Device_2.getBytes());
+				message.setQos(qos);
+				if(IoT_Device_2_Client.isConnected())
+				{
+				System.out.println("Connected IF");	
+				IoT_Device_2_Client.publish("Service_Execution_Peer_Node", message);
+				
+				System.out.println("Deployment Message is: " + Deployment_Message);
+				message = new MqttMessage(Deployment_Message.getBytes());
+				message.setQos(qos);
+				IoT_Device_2_Client.publish("Service_Execution_Peer_Node", message);
+				}
+				else
+				{
+					System.out.println("Connected Else: "+IoT_Device_2_Client.isConnected());	
+					IoT_Device_2_Client.connect(connOpts_IoT_Device_2);
+					//IoT_Device_2_Client.reconnect();
+					int connect_status = 0;
+					if(IoT_Device_2_Client.isConnected() && connect_status == 0)
+					{
+						IoT_Device_2_Client.publish("Service_Execution_Peer_Node", message);
+						System.out.println("Deployment Message is: " + Deployment_Message);
+						message = new MqttMessage(Deployment_Message.getBytes());
+						message.setQos(qos);
+						IoT_Device_2_Client.publish("Service_Execution_Peer_Node", message);
+						connect_status = 1;
+					}
+				}
+				
+				
+				}catch (MqttException me) {
+					me.printStackTrace();
+				}
+			}
+			else
+			{
+			System.out.println("******************Not Connected***************");	
+			try{
+			IoT_Device_2_Client = new MqttClient(IoT_Device_2, IoT_Device_2_ID , new MemoryPersistence());
+			connOpts_IoT_Device_2 = new MqttConnectOptions();
+			connOpts_IoT_Device_2.setCleanSession(true);
+			//connOpts_IoT_Device_2.setConnectionTimeout(1000);
+			connOpts_IoT_Device_2.setKeepAliveInterval(1000); 
+			//connOpts_IoT_Device_2.setAutomaticReconnect(true);
+			
+			System.out.println("Peer Node 1 connecting to IoT Device 2: " + IoT_Device_2);
+			IoT_Device_2_Client.setCallback( new SimpleMqttCallBack()  {
+				 public void connectionLost(Throwable throwable) {
+					    //System.out.println("Connection to MQTT broker lost!");
+					    System.out.println("Listening IoT_Device_2_Client......");
+					  }
+
+					  public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
+					    System.out.println("Message received here:\n\t"+ new String(mqttMessage.getPayload()) );
+					    //sampleClient_RP.publish("iot_data", mqttMessage);
+					  }
+
+					  public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
+					    // not used in this example
+					  }
+	        });
+			
+			IoT_Device_2_Client.connect(connOpts_IoT_Device_2);
+			System.out.println("PC-client connected to broker");
+			String content_IoT_Device_2 = "Invoke "+Service_Name;
+			
+			System.out.println("Peer Node publishing message: " + content_IoT_Device_2);
+			MqttMessage message = new MqttMessage(content_IoT_Device_2.getBytes());
+			message.setQos(qos);
+			if(IoT_Device_2_Client.isConnected())
+			{
+				IoT_Device_2_Client.publish("Service_Execution_Peer_Node", message);
+				System.out.println("Deployment Message is: " + Deployment_Message);
+				message = new MqttMessage(Deployment_Message.getBytes());
+				message.setQos(qos);
+				IoT_Device_2_Client.publish("Service_Execution_Peer_Node", message);
+				
+			}else
+			{
+				try
+				{
+					/*Here commenting Connect is already in Progress*/
+					//IoT_Device_2_Client.connect(connOpts_IoT_Device_1);
+					/*Here commenting Connect is already in Progress*/
+					
+					IoT_Device_2_Client.publish("Service_Execution_Peer_Node", message);
+					/*Here commenting Connect is already in Progress*/
+					System.out.println("Deployment Message is: " + Deployment_Message);
+					message = new MqttMessage(Deployment_Message.getBytes());
+					message.setQos(qos);
+					IoT_Device_2_Client.publish("Service_Execution_Peer_Node", message);
+					
+					
+				}catch (MqttException me) {
+					me.printStackTrace();
+				}
+			}
+			Thread.sleep(200);
+			} catch (MqttException me) {
+				me.printStackTrace();
+			}catch (Throwable e) {
+				e.printStackTrace();
+			}
+			}
+			
+			if(IoT_Device_2_Client != null)
+			{
+			Deployment_Client_Name[Deployment_IP_Address_Count] = IoT_Device_2_Client;
+			Deployment_IP_Address_Count = Deployment_IP_Address_Count + 1;
+			}
+			
+			System.out.println("-------------Deployment_Task_Count ="+Deployment_Task_Count+"---------------------");
+			long stop_time = System.currentTimeMillis();
+			long delay = stop_time - Mobility_LOM.device_left_time[0];
+			double delay_in_sec = delay/1000;
+			System.out.println("-------------delay is ="+delay_in_sec+" seconds---------------------");
+			
+			
+		}
+		
+		
+		/*sService_URI[i] = "Service URI is = " + childNode.getTextContent();
+		System.out.println("sService[i]= "+sService_URI[i]);
+		try{
+		sampleClient_RP.subscribe(sService_URI[i]);
+		//System.out.println(sService[i]); 
+		} catch (MqttException me) {
+			me.printStackTrace();
+		}*/
+		} 
+		} 
+		/*NodeList nDeploymentList = doc.getElementsByTagName("Deployment"); 
+		for(int temp = 0 ; temp <nDeploymentList.getLength(); temp++){ 
+		Node nNode = nDeploymentList.item(temp); 
+		Element eElement = (Element) nNode; 
+		NodeList childList = eElement.getChildNodes(); 
+		String [] sDeployment = new String[childList.getLength()] ; 
+		for(int i = 0; i < childList.getLength(); i++){ 
+		Node childNode = childList.item(i); 
+		//System.out.println("Service Name is= "+childNode.getAttributes().getNamedItem("name").getNodeValue());
+		sDeployment[i] = childNode.getNodeName() + "\t" + childNode.getTextContent();
+		if(childNode.getNodeName().contains("Command"))
+		{
+			//System.out.println(x);
+			Execution_Command = childNode.getTextContent();
+			execution_command_List[task_id] = Execution_Command;
+			task_id = task_id + 1;
+			System.out.println("Execution Command is "+Execution_Command);
+		}
+		
+		if(childNode.getNodeName().contains("Configuration_File"))
+		{
+			Configuration_File = childNode.getTextContent();
+		}
+		//System.out.println(sDeployment[i]); 
+		} 
+		} */		
+    
+	}
+	
 	
 	
 	public static void parseXML(Document doc)
@@ -1094,7 +1763,14 @@ public class Main_Rasp_Combine
 				
 				System.out.println("-------------Deployment_Task_Count ="+Deployment_Task_Count+"---------------------");
 				long stop_time = System.currentTimeMillis();
-				long delay = stop_time - Mobility.device_left_time[0];
+				long delay = 0;
+				if (approach.contains("GOM")) {
+				delay = stop_time - Mobility_GOM.device_left_time[0];
+				}
+				else
+				{
+				delay = stop_time - Mobility_LOM.device_left_time[0];	
+				}
 				double delay_in_sec = delay/1000;
 				System.out.println("-------------delay is ="+delay_in_sec+" seconds---------------------");
 			}
@@ -1243,6 +1919,144 @@ public class Main_Rasp_Combine
         }
 	}
 	
+	public static void executeJar(String jarFilePath, List<String> args) throws Exception {
+		String[] command_args = Execution_Command.split(" ");
+	
+	    // Create run arguments for the
+		final List<String> actualArgs = new ArrayList<String>();
+		
+		for(int i=0;i<command_args.length;i++)
+		{
+			actualArgs.add(i, command_args[i]);
+		}
+		
+	   
+	    actualArgs.addAll(args);
+	   
+	   
+	        try {
+	        final Runtime re = Runtime.getRuntime();
+	        //final Process command = re.exec(cmdString, args.toArray(new String[0]));
+	        final Process command = re.exec(actualArgs.toArray(new String[0]));
+	        System.out.println("Done with Execution");
+	        String content = "Done with Execution";
+	        MqttMessage message = new MqttMessage(content.getBytes());
+	        message.setQos(qos);
+	        if(sampleClient_RP.isConnected())
+	        {
+	        //System.out.println("Here connected");
+	        sampleClient_RP.publish("iot_data", message);
+	        }
+	        else
+	        {
+	        	try
+				{
+	        		System.out.println("Here connecting");
+	        		/*Here commenting Connect is already in Progress*/
+	        		//sampleClient_RP.connect(connOpts);
+	        		/*Here commenting Connect is already in Progress*/
+	        		sampleClient_RP.publish("iot_data", message);
+					
+				}catch (MqttException me) {
+					me.printStackTrace();
+				}
+	        }
+	        
+	        
+	        error = new BufferedReader(new InputStreamReader(command.getErrorStream()));
+	        op = new BufferedReader(new InputStreamReader(command.getInputStream()));
+	        
+	        
+	        command.waitFor(1000, TimeUnit.MILLISECONDS);
+	        exitVal = command.exitValue();
+	        System.out.println("Process exitValue: " + exitVal);
+	        if (exitVal != 0) {
+	            throw new IOException("Failed to execure jar, " + getExecutionLog());
+	        }
+	        	
+	    } catch (final IOException e) {
+	       // catch (final IOException | InterruptedException e) {
+	        throw new Exception(e);
+	    }
+	}
+	
+	public static void executeJar_Linux(String jarFilePath, List<String> args) throws Exception {
+		String[] command_args = Execution_Command.split(" ");
+	
+	    // Create run arguments for the
+		final List<String> actualArgs = new ArrayList<String>();
+		
+		for(int i=0;i<command_args.length;i++)
+		{
+			actualArgs.add(i, command_args[i]);
+		}
+		
+	    
+	    actualArgs.addAll(args);
+	    
+	        try {
+	        final Runtime re = Runtime.getRuntime();
+	        //final Process command = re.exec(cmdString, args.toArray(new String[0]));
+	        final Process command = re.exec(actualArgs.toArray(new String[0]));
+	        System.out.println("Done with Execution");
+	        String content = "Done with Execution";
+	        MqttMessage message = new MqttMessage(content.getBytes());
+	        message.setQos(qos);
+	        if(sampleClient_RP.isConnected())
+	        {
+	        //System.out.println("Here connected");
+	        sampleClient_RP.publish("iot_data", message);
+	        }
+	        else
+	        {
+	        	try
+				{
+	        		System.out.println("Here connecting");
+					//sampleClient_RP.disconnect();
+	        		sampleClient_RP.connect(connOpts);
+	        		sampleClient_RP.publish("iot_data", message);
+					
+				}catch (MqttException me) {
+					me.printStackTrace();
+				}
+	        }
+	        
+	        System.out.println("ee");
+	        
+	        InputStream errStream,inStream;
+	        byte iobuf[] = new byte[4096];
+	        int bytes;
+	        inStream = command.getInputStream();
+	        errStream = command.getErrorStream();
+	        while ((bytes = inStream.read(iobuf)) > 0)
+	        {
+	        	System.out.println("Here");
+	            System.out.write(iobuf,0,bytes);
+	        }
+	          while ((bytes = errStream.read(iobuf)) > 0)
+	          {
+	        	  System.out.println("Here2");
+	            System.err.write(iobuf,0,bytes);
+	          }
+	          System.out.print('W');
+	          command.waitFor(1000, TimeUnit.MILLISECONDS);
+	          System.out.print('w');
+	    
+	          System.out.print('C');
+	          errStream.close();
+	          inStream.close();
+	          command.getOutputStream().close();
+	          System.out.print('c');
+	        
+	        	
+	    } catch (final IOException e) {
+	    
+	       // catch (final IOException | InterruptedException e) {
+	        throw new Exception(e);
+	    }
+	}
+	
+
 	public static String getExecutionLog()
 	{
 	    String error_local = "";
@@ -1502,11 +2316,27 @@ public class Main_Rasp_Combine
 	{
 		Preparation.clean_up();
 		
-		Mobility.arg_5 = args[5];
+		approach = args[6];
+		
+		if (approach.contains("GOM")) {
+			Mobility_GOM m1 = new Mobility_GOM();
+			Mobility_GOM.arg_5 = args[5];
+			}
+			if (approach.contains("LOM")) {
+				Mobility_LOM m1 = new Mobility_LOM();
+				Mobility_LOM.arg_5 = args[5];
+				}
+		
+		
 
 		for(int gh = 0; gh < 20; gh++)
 		{
-			Mobility.startTime[gh] = System.currentTimeMillis();
+			if (approach.contains("GOM")) {
+				Mobility_GOM.startTime[gh] = System.currentTimeMillis();
+			}else
+			{
+				Mobility_LOM.startTime[gh] = System.currentTimeMillis();	
+			}
 		}
 		
 		// Creating a MQTT Broker using Moquette

@@ -6,7 +6,6 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -24,9 +23,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONException;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import io.moquette.interception.AbstractInterceptHandler;
 import io.moquette.interception.InterceptHandler;
@@ -44,7 +40,6 @@ import com.jcraft.jsch.Session;
 
 import connection.MQTTConnectionFactory;
 import entities.Location;
-import entities.PeerNode;
 import entities.TaskInfo;
 
 import java.io.BufferedReader;
@@ -909,18 +904,21 @@ public class Workflow_Coordinator_Main {
 								cloudServiceURL = "http://203.135.63.70/CloudServices/services/PlumeModelingServices";
 								
 								task_id = task_id + 1;
-							
+								
 								if (output_counter[taskIndex - 1] > 0)
 								{
 									HttpResponse<String> response = null;
 									
-									try {
+									try
+									{
 										response = Unirest.post(cloudServiceURL)
 										  .header("SOAPAction", "\"\"")
 										  .header("Content-Type", "text/plain")
 										  .body("<Envelope xmlns=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n    <Body>\r\n        <super_impose_plume_on_google_map xmlns=\"http://incident_management\">\r\n            <kmlData>KML Data</kmlData>\r\n        </super_impose_plume_on_google_map>\r\n    </Body>\r\n</Envelope>")
 										  .asString();
-									} catch (UnirestException e) {
+									}
+									catch (UnirestException e)
+									{
 										e.printStackTrace();
 									}
 									
@@ -937,13 +935,47 @@ public class Workflow_Coordinator_Main {
 							}
 							else if (gom_approach.Communcation_Message[taskIndex + 1].contains("vehicle_status_service"))
 							{
-								Execution_Command = "java -jar gps-vehicle-simulator-1.0.0.BUILD-SNAPSHOT.jar";
+								cloudServiceURL = "http://203.135.63.70/CloudServices/services/GPSSimulation";
 
 								task_id = task_id + 1;
-								if (output_counter[taskIndex - 1] > 0) {
-									executeJarFile(Execution_Command, taskIndex);
+								
+								if (output_counter[taskIndex - 1] > 0)
+								{
+									HttpResponse<String> response = null;
+									
+									try
+									{
+										response = Unirest.post(cloudServiceURL)
+										  .header("SOAPAction", "\"\"")
+										  .header("Content-Type", "text/plain")
+										  .body("<Envelope xmlns=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n" + "    <Body>\r\n" + "        <getVehicleStatus xmlns=\"http://incident_management\"/>\r\n" + "    </Body>\r\n" + "</Envelope>")
+										  .asString();
+									}
+									catch (UnirestException e)
+									{
+										e.printStackTrace();
+									}
+									
+									Document doc = convertStringToDocument(response.getBody());
+									
+									String outputURL = doc.getElementsByTagName("url").item(0).getChildNodes().item(0).getNodeValue();
+									String vehicleStatus = doc.getElementsByTagName("vehicle_status").item(0).getChildNodes().item(0).getNodeValue();
+
+									Helper.openURL(outputURL);
+									
+									Workflow_Coordinator_Main.Communication_Message_Received = "Done with Execution";
+									Workflow_Coordinator_Main.output_counter[taskIndex + 1] = Workflow_Coordinator_Main.output_counter[taskIndex + 1] + 1;
+
+									String taskOutput = "<Task>[" + (Workflow_Coordinator_Main.task_count + 1) + "]</Task> Vehicle_Status_Info =" + vehicleStatus;
+									Workflow_Coordinator_Main.Executed_Task_Output[Workflow_Coordinator_Main.task_count] = taskOutput;
+									Workflow_Coordinator_Main.Current_Vehicle_Status = taskOutput;
+									
+									parse_vehicle_status(vehicleStatus);
+									
 									execution_command_List[taskIndex + 1] = Execution_Command;
 									output_counter[taskIndex - 1] = output_counter[taskIndex - 1] - 1;
+									
+									Workflow_Coordinator_Main.thread_counter = 0;
 								}
 							}
 							else if (gom_approach.Communcation_Message[taskIndex + 1].contains("re_route_vehicle_service"))
@@ -951,18 +983,21 @@ public class Workflow_Coordinator_Main {
 								cloudServiceURL = "http://203.135.63.70/CloudServices/services/TrafficFlowServices";
 								
 								task_id = task_id + 1;
-
+								
 								if (output_counter[taskIndex - 1] > 0)
 								{
 									HttpResponse<String> response = null;
 									
-									try {
+									try
+									{
 										response = Unirest.post(cloudServiceURL)
 										  .header("SOAPAction", "\"\"")
 										  .header("Content-Type", "text/plain")
 										  .body("<Envelope xmlns=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n    <Body>\r\n        <re_route_vehicles xmlns=\"http://incident_management\">\r\n            <currentVehicleLocation>30.456048,-91.205240</currentVehicleLocation>\r\n        </re_route_vehicles>\r\n    </Body>\r\n</Envelope>")
 										  .asString();
-									} catch (UnirestException e) {
+									}
+									catch (UnirestException e)
+									{
 										e.printStackTrace();
 									}
 									
@@ -1182,13 +1217,16 @@ public class Workflow_Coordinator_Main {
 								{
 									HttpResponse<String> response = null;
 									
-									try {
+									try
+									{
 										response = Unirest.post(cloudServiceURL)
 										  .header("SOAPAction", "\"\"")
 										  .header("Content-Type", "text/plain")
 										  .body("<Envelope xmlns=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n    <Body>\r\n        <super_impose_plume_on_google_map xmlns=\"http://incident_management\">\r\n            <kmlData>KML Data</kmlData>\r\n        </super_impose_plume_on_google_map>\r\n    </Body>\r\n</Envelope>")
 										  .asString();
-									} catch (UnirestException e) {
+									}
+									catch (UnirestException e)
+									{
 										e.printStackTrace();
 									}
 									
@@ -1205,14 +1243,47 @@ public class Workflow_Coordinator_Main {
 							}
 							else if(lom_approach.Communcation_Message[taskIndex + 1].contains("vehicle_status_service"))
 							{
-								Execution_Command = "java -jar gps-vehicle-simulator-1.0.0.BUILD-SNAPSHOT.jar";
-								System.out.println("taskId =" + task_id + " ,taskIndex =" + taskIndex);
-	
+								cloudServiceURL = "http://203.135.63.70/CloudServices/services/GPSSimulation";
+
 								task_id = task_id + 1;
-								if (output_counter[taskIndex - 1] > 0) {
-									executeJarFile(Execution_Command, taskIndex);
+								
+								if (output_counter[taskIndex - 1] > 0)
+								{
+									HttpResponse<String> response = null;
+									
+									try
+									{
+										response = Unirest.post(cloudServiceURL)
+										  .header("SOAPAction", "\"\"")
+										  .header("Content-Type", "text/plain")
+										  .body("<Envelope xmlns=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n" + "    <Body>\r\n" + "        <getVehicleStatus xmlns=\"http://incident_management\"/>\r\n" + "    </Body>\r\n" + "</Envelope>")
+										  .asString();
+									}
+									catch (UnirestException e)
+									{
+										e.printStackTrace();
+									}
+									
+									Document doc = convertStringToDocument(response.getBody());
+									
+									String outputURL = doc.getElementsByTagName("url").item(0).getChildNodes().item(0).getNodeValue();
+									String vehicleStatus = doc.getElementsByTagName("vehicle_status").item(0).getChildNodes().item(0).getNodeValue();
+
+									Helper.openURL(outputURL);
+									
+									Workflow_Coordinator_Main.Communication_Message_Received = "Done with Execution";
+									Workflow_Coordinator_Main.output_counter[taskIndex + 1] = Workflow_Coordinator_Main.output_counter[taskIndex + 1] + 1;
+
+									String taskOutput = "<Task>[" + (Workflow_Coordinator_Main.task_count + 1) + "]</Task> Vehicle_Status_Info =" + vehicleStatus;
+									Workflow_Coordinator_Main.Executed_Task_Output[Workflow_Coordinator_Main.task_count] = taskOutput;
+									Workflow_Coordinator_Main.Current_Vehicle_Status = taskOutput;
+									
+									parse_vehicle_status(vehicleStatus);
+									
 									execution_command_List[taskIndex + 1] = Execution_Command;
 									output_counter[taskIndex - 1] = output_counter[taskIndex - 1] - 1;
+								
+									Workflow_Coordinator_Main.thread_counter = 0;
 								}
 							}
 							else if(lom_approach.Communcation_Message[taskIndex + 1].contains("re_route_vehicle_service"))
@@ -1220,18 +1291,21 @@ public class Workflow_Coordinator_Main {
 								cloudServiceURL = "http://203.135.63.70/CloudServices/services/TrafficFlowServices";
 								
 								task_id = task_id + 1;
-	
+								
 								if (output_counter[taskIndex - 1] > 0)
 								{
 									HttpResponse<String> response = null;
 									
-									try {
+									try
+									{
 										response = Unirest.post(cloudServiceURL)
 										  .header("SOAPAction", "\"\"")
 										  .header("Content-Type", "text/plain")
 										  .body("<Envelope xmlns=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n    <Body>\r\n        <re_route_vehicles xmlns=\"http://incident_management\">\r\n            <currentVehicleLocation>30.456048,-91.205240</currentVehicleLocation>\r\n        </re_route_vehicles>\r\n    </Body>\r\n</Envelope>")
 										  .asString();
-									} catch (UnirestException e) {
+									}
+									catch (UnirestException e)
+									{
 										e.printStackTrace();
 									}
 									
@@ -1286,41 +1360,6 @@ public class Workflow_Coordinator_Main {
 		}
 	}
 	
-	public static void executeJarFile(String jarFilePath, int taskIndex)
-	{
-		String command = Workflow_Coordinator_Main.Execution_Command;
-		command = command.replace("java", "");
-		command = command.replace("-jar", "");
-		command = command.replace(" ", "");
-
-		boolean waitForResponse = false;
-
-		ProcessBuilder pb = new ProcessBuilder("java", "-jar", command);
-		pb.redirectErrorStream(true);
-
-		try
-		{
-			Process shell = pb.start();
-			InputStream shellIn = shell.getInputStream();
-			LogStreamReader_Combine lsr = new LogStreamReader_Combine(shellIn, taskIndex);
-			Thread thread = new Thread(lsr, "LogStreamReader_Combine");
-
-			thread.start();
-			
-			if (waitForResponse)
-			{
-				// Wait for the shell to finish and get the return code
-				shell.waitFor();
-
-				shellIn.close();
-			}
-		}
-		catch (Exception e)
-		{
-			System.out.println("Error occured while executing Linux command. Error Description: " + e.getMessage());
-		}
-	}
-
 	public static void Get_Status(URL vehicle_status_url)
 	{
 		try
@@ -1398,7 +1437,14 @@ public class Workflow_Coordinator_Main {
 				
 				location = new Location(latitude, longitude);
 
-				closest_peer_node[i] = lom_approach.peerNodeSearch(location);
+				if (approach.contains("GOM"))
+				{
+					closest_peer_node[i] = gom_approach.peerNodeSearch(location);
+				}
+				else
+				{
+					closest_peer_node[i] = lom_approach.peerNodeSearch(location);
+				}
 			}
 
 		} catch (JSONException pe)
@@ -1425,7 +1471,6 @@ public class Workflow_Coordinator_Main {
 			System.out.println("IOException: " + ioe);
 		}
 	}
-
 }
 
 class LogStreamReader_Combine implements Runnable

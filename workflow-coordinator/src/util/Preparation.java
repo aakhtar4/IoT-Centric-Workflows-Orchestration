@@ -12,10 +12,13 @@ public class Preparation {
 		for(String fileName : files_to_delete)
 		{
 			File file = new File(fileName);
+			
 			try
 			{
 				Files.deleteIfExists(file.toPath());
-			} catch (IOException e) {
+			}
+			catch (IOException e)
+			{
 				e.printStackTrace();
 			}
 		}

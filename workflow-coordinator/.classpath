@@ -33,5 +33,6 @@
 	<classpathentry kind="lib" path="lib/httpcore-4.4.3.jar"/>
 	<classpathentry kind="lib" path="lib/httpcore-nio-4.4.3.jar"/>
 	<classpathentry kind="lib" path="lib/unirest-java-1.4.9.jar"/>
+	<classpathentry kind="lib" path="lib/commons-logging.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
