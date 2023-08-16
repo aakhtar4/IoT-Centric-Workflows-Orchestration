@@ -23,6 +23,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONException;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import io.moquette.interception.AbstractInterceptHandler;
 import io.moquette.interception.InterceptHandler;
@@ -898,10 +901,15 @@ public class Workflow_Coordinator_Main {
 						if(gom_approach.Communcation_Message[taskIndex + 1].contains("Cloud Service"))
 						{
 							String cloudServiceURL = null;
+							String messageContent = gom_approach.Communcation_Message[taskIndex + 1];
+							Document messageDoc = convertStringToDocument(messageContent); 
+							String sService_URI = parseXML(messageDoc);
+							System.out.println("sService_URI =" + sService_URI);
 
 							if (gom_approach.Communcation_Message[taskIndex + 1].contains("impose_plume_service"))
 							{
-								cloudServiceURL = "http://203.135.63.70/CloudServices/services/PlumeModelingServices";
+								//cloudServiceURL = "http://203.135.63.70/CloudServices/services/PlumeModelingServices";
+								cloudServiceURL = sService_URI;
 								
 								task_id = task_id + 1;
 								
@@ -935,7 +943,8 @@ public class Workflow_Coordinator_Main {
 							}
 							else if (gom_approach.Communcation_Message[taskIndex + 1].contains("vehicle_status_service"))
 							{
-								cloudServiceURL = "http://203.135.63.70/CloudServices/services/GPSSimulation";
+								//cloudServiceURL = "http://203.135.63.70/CloudServices/services/GPSSimulation";
+								cloudServiceURL = sService_URI;
 
 								task_id = task_id + 1;
 								
@@ -980,7 +989,8 @@ public class Workflow_Coordinator_Main {
 							}
 							else if (gom_approach.Communcation_Message[taskIndex + 1].contains("re_route_vehicle_service"))
 							{
-								cloudServiceURL = "http://203.135.63.70/CloudServices/services/TrafficFlowServices";
+								//cloudServiceURL = "http://203.135.63.70/CloudServices/services/TrafficFlowServices";
+								cloudServiceURL = sService_URI;
 								
 								task_id = task_id + 1;
 								
@@ -1206,10 +1216,16 @@ public class Workflow_Coordinator_Main {
 						if(lom_approach.Communcation_Message[taskIndex + 1].contains("Cloud Service"))
 						{
 							String cloudServiceURL = null;
+							String messageContent = lom_approach.Communcation_Message[taskIndex + 1];
+							System.out.println("messageContent ="+messageContent);
+							Document messageDoc = convertStringToDocument(messageContent); 
+							String sService_URI = parseXML(messageDoc);
+							System.out.println("sService_URI =" + sService_URI);
 	
 							if (lom_approach.Communcation_Message[taskIndex + 1].contains("impose_plume_service"))
 							{
-								cloudServiceURL = "http://203.135.63.70/CloudServices/services/PlumeModelingServices";
+								//cloudServiceURL = "http://203.135.63.70/CloudServices/services/PlumeModelingServices";
+								cloudServiceURL = sService_URI;
 								
 								task_id = task_id + 1;
 								
@@ -1243,7 +1259,8 @@ public class Workflow_Coordinator_Main {
 							}
 							else if(lom_approach.Communcation_Message[taskIndex + 1].contains("vehicle_status_service"))
 							{
-								cloudServiceURL = "http://203.135.63.70/CloudServices/services/GPSSimulation";
+								//cloudServiceURL = "http://203.135.63.70/CloudServices/services/GPSSimulation";
+								cloudServiceURL = sService_URI;
 
 								task_id = task_id + 1;
 								
@@ -1288,7 +1305,8 @@ public class Workflow_Coordinator_Main {
 							}
 							else if(lom_approach.Communcation_Message[taskIndex + 1].contains("re_route_vehicle_service"))
 							{
-								cloudServiceURL = "http://203.135.63.70/CloudServices/services/TrafficFlowServices";
+								//cloudServiceURL = "http://203.135.63.70/CloudServices/services/TrafficFlowServices";
+								cloudServiceURL = sService_URI;
 								
 								task_id = task_id + 1;
 								
@@ -1358,6 +1376,23 @@ public class Workflow_Coordinator_Main {
 			
 			return null;
 		}
+		
+		public static String parseXML(Document doc)
+	    {
+			doc.getDocumentElement().normalize();	
+			NodeList nServiceList = doc.getElementsByTagName("Service"); 
+			Node nNode = nServiceList.item(0); 
+			Element eElement = (Element) nNode; 
+			NodeList childList = eElement.getChildNodes(); 
+			Node childNode = childList.item(0);
+			String sService_URI = new String() ; 
+			
+			if(childNode.getNodeName().contains("URI"))
+				sService_URI = childNode.getTextContent();
+			
+			return sService_URI;
+	    
+	    }
 	}
 	
 	public static void Get_Status(URL vehicle_status_url)

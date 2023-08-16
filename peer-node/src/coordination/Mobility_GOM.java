@@ -12,23 +12,23 @@ public class Mobility_GOM implements Runnable {
 	int device_active = 20;
 	int device_count = 20;
 	int current_active_device = 20;
-	public static String device_IP_Address[] = new String[20];
+	public String device_IP_Address[] = new String[20];
 	//double device_latitude[] = new double[20];
 	//double device_longitude[] = new double[20];
 	double residence_prob[] = new double[20];
-	public static double residence_time_minutes[] = new double[20];
-	public static double residence_time_assigned[] = new double[20];
+	public double residence_time_minutes[] = new double[20];
+	public double residence_time_assigned[] = new double[20];
 	double residence_time_millisec[] = new double[20];
-	public static long startTime[] = new long[20];
+	public long startTime[] = new long[20];
 	public long stopTime[] = new long[20];
 	public long elapsedTime[] = new long[20];
 	public double elapsedTime_in_sec = 0;
-	public static long device_left_time[] = new long[100];
+	public long device_left_time[] = new long[100];
 	public double annoucement_start_time = 0;
 	public double annoucement_end_time = 0;
 	public double annoucement_elapsed_time = 0;
 	public double device_last_update_time[] = new double[20];
-	public static String arg_5 = "";
+	public String arg_5 = "";
 	String device_status = "";
 	
 	

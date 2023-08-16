@@ -84,6 +84,8 @@ public class Main_Rasp_IoT
 	public static int Temperature_Reading[] = new int[1000];
 	public static int temperature_count = 0;
 	
+	public static int sensor_count = 0;
+	
 	public static int Streaming_Flag = 0;
 	public static int task_count = 0;
 	public static Task t1 = null;
@@ -100,6 +102,7 @@ public class Main_Rasp_IoT
 	public static boolean Flag_ST = false;
 	public static boolean Flag_SH = false;
 	public static boolean Flag_SAC = false;
+	public static boolean Flag_Sensor = false;
 	public static int task_output_count = 0;
 	
 	public static final Pattern TAG_REGEX_LEFT = Pattern.compile("<LHS>(.+?)</LHS>");	
@@ -229,7 +232,7 @@ public class Main_Rasp_IoT
 				}
 			}
 			
-			if(new String(message.getPayload().array()).contains("Publish wind_direction Data"))
+			else if(new String(message.getPayload().array()).contains("Publish wind_direction Data"))
 			{
 				if(Flag_SWD == false)
 				{
@@ -239,7 +242,7 @@ public class Main_Rasp_IoT
 			}
 			
 			
-			if(new String(message.getPayload().array()).contains("Publish temperature Data"))
+			else if(new String(message.getPayload().array()).contains("Publish temperature Data"))
 			{
 				if(Flag_ST == false)
 				{
@@ -249,7 +252,7 @@ public class Main_Rasp_IoT
 			}
 			
 			
-			if(new String(message.getPayload().array()).contains("Publish humidity Data"))
+			else if(new String(message.getPayload().array()).contains("Publish humidity Data"))
 			{
 				if(Flag_SH == false)
 				{
@@ -258,12 +261,21 @@ public class Main_Rasp_IoT
 				}
 			}
 			
-			if(new String(message.getPayload().array()).contains("Publish aerosol_concentration Data"))
+			else if(new String(message.getPayload().array()).contains("Publish aerosol_concentration Data"))
 			{
 				if(Flag_SAC == false)
 				{
 					initializeSensor(message, "SAC");
 					Flag_SAC = true;
+				}
+			}
+			
+			else if((new String(message.getPayload().array()).contains("Publish")) && (new String(message.getPayload().array()).contains("Data")))
+			{
+				if(Flag_Sensor == false)
+				{
+					initializeSensor(message, "Sensor");
+					Flag_Sensor = true;
 				}
 			}
 			
@@ -285,6 +297,7 @@ public class Main_Rasp_IoT
 				humidity_count = 0;
 				aerosol_concentration_count = 0;
 				temperature_count = 0;
+				sensor_count = 0;
 				
 				String xmlStr= new String(message.getPayload().array());
 				Document doc = convertStringToDocument(xmlStr); 
@@ -796,9 +809,20 @@ public class Main_Rasp_IoT
 			deviceNumber = 6;
 			aerosol_concentration_count = 0;
 		}
+		else if(sensorName == "Sensor")
+		{
+			sensorTopic = "home/sensor";
+			deviceNumber = 8;
+			sensor_count = 0;
+		}
 		
 		String received_message = new String(message.getPayload().array());
-
+		String sensorURI = "";
+		if(received_message.contains("{"))
+		{
+			sensorURI = received_message.substring(received_message.indexOf("{") + 1, received_message.indexOf("}"));
+		}
+		
 		if(received_message.contains("["))
 		{
 			String deviceURI = received_message.substring(received_message.indexOf("[") + 1, received_message.indexOf("]"));
@@ -834,7 +858,7 @@ public class Main_Rasp_IoT
 				me.printStackTrace();
 			}
 			
-			sensors.add(new SensorServiceHandler(deviceURI, deviceNumber, sensorName, sensorTopic, IoT_Device_Client));
+			sensors.add(new SensorServiceHandler(deviceURI, deviceNumber, sensorName, sensorTopic, sensorURI, IoT_Device_Client));
 		}
 	}
 	
@@ -2257,13 +2281,15 @@ class SensorServiceHandler implements Runnable
 	MqttClient mqttClient;
 	String sensorTopic;
 	String sensorName;
+	String sensorURI;
 	
-	SensorServiceHandler(String deviceURI, int deviceNumber, String sensorName, String sensorTopic, MqttClient mqttClient)
+	SensorServiceHandler(String deviceURI, int deviceNumber, String sensorName, String sensorTopic, String sensorURI, MqttClient mqttClient)
 	{
 		try
 		{
 			this.sensorTopic = sensorTopic;
 			this.sensorName = sensorName;
+			this.sensorURI = sensorURI;
 			this.mqttClient = mqttClient;
 			
 			t = new Thread(this);
@@ -2293,7 +2319,7 @@ class SensorServiceHandler implements Runnable
 			        
 			        try
 					{
-						HttpResponse<String> response = Unirest.post("http://203.135.63.70/SensorDataGenerationAndIntegration/services/Wind_Speed_Sensor")
+						HttpResponse<String> response = Unirest.post(sensorURI)
 						  .header("SOAPAction", "\"\"")
 						  .header("Content-Type", "text/plain")
 						  .body("<Envelope xmlns=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n    <Body>\r\n        <getWindSpeed xmlns=\"http://incident_management\"/>\r\n    </Body>\r\n</Envelope>")
@@ -2316,7 +2342,7 @@ class SensorServiceHandler implements Runnable
 			        
 			        try
 					{
-			        	HttpResponse<String> response = Unirest.post("http://203.135.63.70/SensorDataGenerationAndIntegration/services/Wind_Direction_Sensor")
+			        	HttpResponse<String> response = Unirest.post(sensorURI)
 			      			  .header("SOAPAction", "\"\"")
 			      			  .header("Content-Type", "text/plain")
 			      			  .body("<Envelope xmlns=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n    <Body>\r\n        <getWindDirection xmlns=\"http://incident_management\"/>\r\n    </Body>\r\n</Envelope>")
@@ -2339,7 +2365,7 @@ class SensorServiceHandler implements Runnable
 			        
 			        try
 					{
-			        	HttpResponse<String> response = Unirest.post("http://203.135.63.70/SensorDataGenerationAndIntegration/services/TemperatureSensor")
+			        	HttpResponse<String> response = Unirest.post(sensorURI)
 						  .header("SOAPAction", "\"\"")
 						  .header("Content-Type", "text/plain")
 						  .body("<Envelope xmlns=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n    <Body>\r\n        <getTemperature xmlns=\"http://incident_management\"/>\r\n    </Body>\r\n</Envelope>")
@@ -2362,7 +2388,7 @@ class SensorServiceHandler implements Runnable
 			 	    
 					try
 			 	   	{
-			 		  HttpResponse<String> response = Unirest.post("http://203.135.63.70/SensorDataGenerationAndIntegration/services/HumiditySensor")
+			 		  HttpResponse<String> response = Unirest.post(sensorURI)
 							  .header("SOAPAction", "\"\"")
 							  .header("Content-Type", "text/plain")
 							  .body("<Envelope xmlns=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n    <Body>\r\n        <getHumidity xmlns=\"http://incident_management\"/>\r\n    </Body>\r\n</Envelope>")
@@ -2385,7 +2411,7 @@ class SensorServiceHandler implements Runnable
 			 	    
 					try
 					{
-			 		   	HttpResponse<String> response = Unirest.post("http://203.135.63.70/SensorDataGenerationAndIntegration/services/AerosolConcentrationSensor")
+			 		   	HttpResponse<String> response = Unirest.post(sensorURI)
 						  .header("SOAPAction", "\"\"")
 						  .header("Content-Type", "text/plain")
 						  .body("<Envelope xmlns=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n    <Body>\r\n        <getAerosolConcentartion xmlns=\"http://incident_management\"/>\r\n    </Body>\r\n</Envelope>")
@@ -2401,6 +2427,30 @@ class SensorServiceHandler implements Runnable
 					}
 
 		 	        sensorReading = Aerosol_Concentration_Number + " cm";
+				}
+		        
+				else if(sensorName == "Sensor")
+				{
+					int Sensor_Number = -1;
+			 	    
+					try
+					{
+			 		   	HttpResponse<String> response = Unirest.post(sensorURI)
+						  .header("SOAPAction", "\"\"")
+						  .header("Content-Type", "text/plain")
+						  .body("<Envelope xmlns=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n    <Body>\r\n        <getAerosolConcentartion xmlns=\"http://incident_management\"/>\r\n    </Body>\r\n</Envelope>")
+						  .asString();
+							
+						Document doc = Main_Rasp_IoT.convertStringToDocument(response.getBody());
+							
+						Sensor_Number = Integer.parseInt(doc.getElementsByTagName("getAerosolConcentartionReturn").item(0).getChildNodes().item(0).getNodeValue());
+					}
+					catch (UnirestException e)
+					{
+						e.printStackTrace();
+					}
+
+		 	        sensorReading = Sensor_Number + " cm";
 				}
 		        
 		        if(mqttClient.isConnected())

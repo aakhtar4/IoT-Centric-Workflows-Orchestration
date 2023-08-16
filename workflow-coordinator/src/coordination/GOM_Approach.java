@@ -602,7 +602,7 @@ public class GOM_Approach
 		}
 		else if (service.service_type.contains("Cloud Service"))
 		{
-			Communcation_Message[task_ID] = Communcation_Message[task_ID] + "<Service name=\"" + service.service_name + "\">" + "<URI>" + service.uri + "</URI>" + "<IP_Address>" + service.mapped_end_device.IP_Address + "</IP_Address><Type>" + service.service_type + "</Type><Deployment>" + (service.deployable ? 1 : 0) + "</Deployment></Service>";
+			Communcation_Message[task_ID] = Communcation_Message[task_ID] + "<Service name=\"" + service.service_name + "\">" + "<URI>" + service.uri + "</URI>" + "<IP_Address>" + service.mapped_end_device.IP_Address + "</IP_Address><Type>" + service.service_type + "</Type><Deployment>" + (service.deployable ? 1 : 0) + "</Deployment></Service></response>";
 		}
 	}
 	

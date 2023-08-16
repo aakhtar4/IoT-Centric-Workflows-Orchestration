@@ -177,19 +177,19 @@ public class Main_Rasp_Combine
 					for(int op=0; op<20; op++)
 					{
 						if (approach.contains("GOM")) {
-						if(text_message.contains(Mobility_GOM.device_IP_Address[op]))
+						if(text_message.contains(m1_gom.device_IP_Address[op]))
 						{
-							System.out.println("Residence Time ="+Mobility_GOM.residence_time_minutes[op]);
-							Mobility_GOM.residence_time_minutes[op] = Mobility_GOM.residence_time_assigned[op];
-							Mobility_GOM.startTime[op] = System.currentTimeMillis();
+							System.out.println("Residence Time ="+m1_gom.residence_time_minutes[op]);
+							m1_gom.residence_time_minutes[op] = m1_gom.residence_time_assigned[op];
+							m1_gom.startTime[op] = System.currentTimeMillis();
 						}
 						}
 						else {
-							if(text_message.contains(Mobility_LOM.device_IP_Address[op]))
+							if(text_message.contains(m1_lom.device_IP_Address[op]))
 							{
-								System.out.println("Residence Time ="+Mobility_LOM.residence_time_minutes[op]);
-								Mobility_LOM.residence_time_minutes[op] = Mobility_LOM.residence_time_assigned[op];
-								Mobility_LOM.startTime[op] = System.currentTimeMillis();
+								System.out.println("Residence Time ="+m1_lom.residence_time_minutes[op]);
+								m1_lom.residence_time_minutes[op] = m1_lom.residence_time_assigned[op];
+								m1_lom.startTime[op] = System.currentTimeMillis();
 							}
 							}
 						
@@ -391,22 +391,22 @@ public class Main_Rasp_Combine
 				for(int cd = 0; cd<20; cd++)
 				{
 					if (approach.contains("GOM")) {
-					System.out.println("m1_gom.device_IP_Address[cd] ="+Mobility_GOM.device_IP_Address[cd]);
+					System.out.println("Mobility_GOM.device_IP_Address[cd] ="+m1_gom.device_IP_Address[cd]);
 					
-					if(status_message.contains(Mobility_GOM.device_IP_Address[cd]))
+					if(status_message.contains(m1_gom.device_IP_Address[cd]))
 					{
-						System.out.println("Status Updation =" + Mobility_GOM.device_IP_Address[cd]);
+						System.out.println("Status Updation =" + m1_gom.device_IP_Address[cd]);
 						m1_gom.device_last_update_time[cd] = System.currentTimeMillis();
 					}
 					}
 					else
 					{
 
-						System.out.println("m1_lom.device_IP_Address[cd] ="+Mobility_LOM.device_IP_Address[cd]);
+						System.out.println("m1_lom.device_IP_Address[cd] ="+m1_lom.device_IP_Address[cd]);
 						
-						if(status_message.contains(Mobility_LOM.device_IP_Address[cd]))
+						if(status_message.contains(m1_lom.device_IP_Address[cd]))
 						{
-							System.out.println("Status Updation =" + Mobility_LOM.device_IP_Address[cd]);
+							System.out.println("Status Updation =" + m1_lom.device_IP_Address[cd]);
 							m1_lom.device_last_update_time[cd] = System.currentTimeMillis();
 						}
 						
@@ -1112,7 +1112,7 @@ public class Main_Rasp_Combine
 			
 			IoT_Device_1_Client.connect(connOpts_IoT_Device_1);
 			System.out.println("Peer Node 1 Conencted to IoT Device 1");
-			String content_IoT_Device_1 = "Publish "+Service_Name+" Data to IP: ["+sService_Destination_IP_Add[i]+"]";
+			String content_IoT_Device_1 = "Publish "+Service_Name+" Data to IP: ["+sService_Destination_IP_Add[i]+"] URI {"+sService_URI[i]+"}";
 			
 			System.out.println("Peer Node publishing message: " + content_IoT_Device_1);
 			MqttMessage message = new MqttMessage(content_IoT_Device_1.getBytes());
@@ -1364,7 +1364,7 @@ public class Main_Rasp_Combine
 			
 			System.out.println("-------------Deployment_Task_Count ="+Deployment_Task_Count+"---------------------");
 			long stop_time = System.currentTimeMillis();
-			long delay = stop_time - Mobility_LOM.device_left_time[0];
+			long delay = stop_time - m1_lom.device_left_time[0];
 			double delay_in_sec = delay/1000;
 			System.out.println("-------------delay is ="+delay_in_sec+" seconds---------------------");
 			
@@ -1508,7 +1508,7 @@ public class Main_Rasp_Combine
 				
 				IoT_Device_1_Client.connect(connOpts_IoT_Device_1);
 				System.out.println("Peer Node 1 Conencted to IoT Device 1");
-				String content_IoT_Device_1 = "Publish "+Service_Name+" Data to IP: ["+sService_Destination_IP_Add[i]+"]";
+				String content_IoT_Device_1 = "Publish "+Service_Name+" Data to IP: ["+sService_Destination_IP_Add[i]+"] URI {"+sService_URI[i]+"}";
 				
 				System.out.println("1 Peer Node publishing message: " + content_IoT_Device_1);
 				MqttMessage message = new MqttMessage(content_IoT_Device_1.getBytes());
@@ -1765,11 +1765,11 @@ public class Main_Rasp_Combine
 				long stop_time = System.currentTimeMillis();
 				long delay = 0;
 				if (approach.contains("GOM")) {
-				delay = stop_time - Mobility_GOM.device_left_time[0];
+				delay = stop_time - m1_gom.device_left_time[0];
 				}
 				else
 				{
-				delay = stop_time - Mobility_LOM.device_left_time[0];	
+				delay = stop_time - m1_lom.device_left_time[0];	
 				}
 				double delay_in_sec = delay/1000;
 				System.out.println("-------------delay is ="+delay_in_sec+" seconds---------------------");
@@ -2319,12 +2319,12 @@ public class Main_Rasp_Combine
 		approach = args[6];
 		
 		if (approach.contains("GOM")) {
-			Mobility_GOM m1 = new Mobility_GOM();
-			Mobility_GOM.arg_5 = args[5];
+			m1_gom = new Mobility_GOM();
+			m1_gom.arg_5 = args[5];
 			}
 			if (approach.contains("LOM")) {
-				Mobility_LOM m1 = new Mobility_LOM();
-				Mobility_LOM.arg_5 = args[5];
+				m1_lom = new Mobility_LOM();
+				m1_lom.arg_5 = args[5];
 				}
 		
 		
@@ -2332,10 +2332,10 @@ public class Main_Rasp_Combine
 		for(int gh = 0; gh < 20; gh++)
 		{
 			if (approach.contains("GOM")) {
-				Mobility_GOM.startTime[gh] = System.currentTimeMillis();
+				m1_gom.startTime[gh] = System.currentTimeMillis();
 			}else
 			{
-				Mobility_LOM.startTime[gh] = System.currentTimeMillis();	
+				m1_lom.startTime[gh] = System.currentTimeMillis();	
 			}
 		}
 		
@@ -2377,6 +2377,7 @@ public class Main_Rasp_Combine
 		System.out.println("clientId_RP ="+clientId_RP);
 		
 		try {
+			
 			
 			/************************************RP CLIENT START**********************************/
 			//final MqttClient sampleClient_RP = new MqttClient(broker_RP, clientId_RP, new MemoryPersistence());

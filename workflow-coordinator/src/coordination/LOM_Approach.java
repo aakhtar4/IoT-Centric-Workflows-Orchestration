@@ -202,7 +202,13 @@ public class LOM_Approach
 					
 					service.deployable = service.deployment_status.equalsIgnoreCase("Deployable");
 					
-					if (service.deployable && service.service_type.contains("Fog Service")) // For computation services
+					if (service.deployable == false)
+					{
+						//selectEndDeviceForNonDeployableService(service, workflowLocation, Selected_Peer_Node, cell_id);
+						selectEndDeviceForNonDeployableService(service.service_name, service.required_availability_duration, service.service_type, 0, workflowLocation, Selected_Peer_Node, cell_id);
+					}
+			
+					else if (service.deployable && service.service_type.contains("Fog Service")) // For computation services
 					{
 						System.out.println("I have to Handle Fog Service");
 						
@@ -221,7 +227,7 @@ public class LOM_Approach
 					}
 					else if(service.deployable == false && service.service_type.contains("Cloud Service")) //For computation services
 					{
-						Communcation_Message[task_Id] = Communcation_Message[task_Id] + "<Service name=\""+service.service_name+"\">"+"<URI>"+URI+"</URI>"+"<IP_Address>"+IP_Address+"</IP_Address><Type>"+service.service_type+"</Type><Deployment>"+ (service.deployable == true ? 1 : 0) +"</Deployment></Service>";
+						Communcation_Message[task_Id] = Communcation_Message[task_Id] + "<Service name=\""+service.service_name+"\">"+"<URI>"+URI+"</URI>"+"<IP_Address>"+IP_Address+"</IP_Address><Type>"+service.service_type+"</Type><Deployment>"+ (service.deployable == true ? 1 : 0) +"</Deployment></Service></response>";
 					}
 				}
 				
@@ -236,7 +242,8 @@ public class LOM_Approach
 	    }	    
     }
     
-	public void selectEndDeviceForNonDeployableService(String Service_Name, String Location, int Availability, String Service_Type, int Deployable, int Non_Deployable, Location workflowLocation, int Selected_Peer_Node, int cell_id) throws Exception
+    
+	public void selectEndDeviceForNonDeployableService(String Service_Name, int Availability, String Service_Type, int Deployable, Location workflowLocation, int Selected_Peer_Node, int cell_id) throws Exception
 	{
 		try 
 		{
@@ -247,7 +254,7 @@ public class LOM_Approach
 			
 	      connect = new DBConnectionFactory().getConnection();
 		      
-	      String query = "SELECT * FROM services where Service_Name = '"+Service_Name+"' AND Availability >="+Availability+" AND Service_Type = '"+Service_Type+"' AND Deployable ="+Deployable+" AND Non_Deployable = "+Non_Deployable;
+	      String query = "SELECT * FROM services where Service_Name = '"+Service_Name+"' AND Availability >="+Availability+" AND Service_Type = '"+Service_Type+"' AND Deployable ="+Deployable;
 	      System.out.println("Query = "+query);	
 	      Statement st = connect.createStatement();
 	      ResultSet rs = st.executeQuery(query);
@@ -662,7 +669,7 @@ public class LOM_Approach
 		      }
 		      if(Service_Type.contains("Cloud Service"))
 		      {
-		      Communcation_Message[task_Id] = Communcation_Message[task_Id] + "<Service name=\""+Service_Name+"\">"+"<URI>"+URI+"</URI>"+"<IP_Address>"+IP_Address+"</IP_Address><Type>"+Service_Type+"</Type><Deployment>"+Deployable+"</Deployment></Service>";
+		      Communcation_Message[task_Id] = Communcation_Message[task_Id] + "<Service name=\""+Service_Name+"\">"+"<URI>"+URI+"</URI>"+"<IP_Address>"+IP_Address+"</IP_Address><Type>"+Service_Type+"</Type><Deployment>"+Deployable+"</Deployment></Service></response>";
 		      }
 		    }
 		    catch (Exception e)
